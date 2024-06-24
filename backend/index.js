@@ -22,43 +22,7 @@ app.use(
     extended: true,
   })
 )
-// const CLIENT_ID = '';
-// const CLIENT_SECRET = '';
-// const REDIRECT_URI = '';
-// const REFRESH_TOKEN = '';
 
-// const oAuth2Client = "";
-// // oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-
-/*async function sendEmail(to, subject, html) {
-  try {
-    const accessToken = await oAuth2Client.getAccessToken();
-    
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        type: 'OAuth2',
-        user: 'mohorb04@gmail.com',
-        clientId: CLIENT_ID,
-        clientSecret: CLIENT_SECRET,
-        refreshToken: REFRESH_TOKEN,
-        accessToken: accessToken.token,
-      },
-    });
-
-    const mailOptions = {
-      from: 'mohorb04@gmail.com',
-      to,
-      subject,
-      html,
-    };
-
-    const result = await transporter.sendMail(mailOptions);
-    return result;
-  } catch (error) {
-    console.error('Error sending email:', error);
-  }
-}*/
 app.get('/', (request, response) => {
     response.json({ info: 'Node.js, Express, and Postgres API' })
   })
