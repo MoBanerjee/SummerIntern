@@ -2,9 +2,9 @@ import { PublicClientApplication } from "@azure/msal-browser";
 
 export const msalConfig = {
   auth: {
-    clientId: "b28c3a37-c88f-406c-a8fd-1ad5bd25d400",
-    authority: "https://login.microsoftonline.com/common",
-    redirectUri: "http://localhost:5001/",
+    clientId: "",
+    authority: "",
+    redirectUri: "",
   },
   cache: {
     cacheLocation: "localStorage", 

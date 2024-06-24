@@ -22,15 +22,15 @@ app.use(
     extended: true,
   })
 )
-const CLIENT_ID = '645233064639-htv7ls5g3l4op1eed3tvr7qdkt6t4ujr.apps.googleusercontent.com';
-const CLIENT_SECRET = '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';
-const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
-const REFRESH_TOKEN = '1//048UtCmsfP5JhCgYIARAAGAQSNwF-L9Ir8qANacHKBgQMcZn3wZzG54_HYLvGqflsu8kHbxZGNmNz89XEvXn06gPWj3Cx1LEehaQ';
+// const CLIENT_ID = '';
+// const CLIENT_SECRET = '';
+// const REDIRECT_URI = '';
+// const REFRESH_TOKEN = '';
 
-const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
-oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+// const oAuth2Client = "";
+// // oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
-async function sendEmail(to, subject, html) {
+/*async function sendEmail(to, subject, html) {
   try {
     const accessToken = await oAuth2Client.getAccessToken();
     
@@ -58,7 +58,7 @@ async function sendEmail(to, subject, html) {
   } catch (error) {
     console.error('Error sending email:', error);
   }
-}
+}*/
 app.get('/', (request, response) => {
     response.json({ info: 'Node.js, Express, and Postgres API' })
   })
