@@ -74,6 +74,8 @@ useEffect(() => {
       localStorage.setItem('state', JSON.stringify("Received by Level 2"));
       else if(results.data.rows[0].status==="submitted")
       localStorage.setItem('state', JSON.stringify("Submitted but not approved"));
+      else if( results.data.rows[0].status==="rectify")
+      localStorage.setItem('state', JSON.stringify("Reset for rectification"));
       localStorage.setItem('manhours', JSON.stringify(obj));
 
 
@@ -148,6 +150,7 @@ replaceMinusOneWithNA(obj);
         else if(row.status=="dl1")st="Denied by Level 1";
         else if(row.status=="dl2")st="Denied by Level 2";
         else if(row.status=="submitted")st="Submitted- Yet to be Approved";
+        else if (row.status=="rectify")st="Reset for rectification";
         response=response.concat([{month: months[monthIndex], status: st, openform: openform, remarks: '' ,mth:monthIndex+1}])
        
        

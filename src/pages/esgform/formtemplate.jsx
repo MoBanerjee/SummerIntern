@@ -104,6 +104,27 @@ replaceMinusOneWithNA(obj);
     }} catch (error) {
       console.error("Error fetching data:", error);
     }
+    try {
+      const f=JSON.parse(localStorage.getItem(
+        "fid"
+        ));
+        let results=""
+      for(let i=1;i<7;i++){
+        if(i===4)continue;
+       results = await axios.post(`http://localhost:3000/getgri${i}`, {
+        fid:f-1,
+
+      });
+      let obj = results.data.rows[0];
+replaceMinusOneWithNA(obj);
+      localStorage.setItem('grip'+i, JSON.stringify(obj));//flux analysis for not submitted forms?
+      
+
+
+      
+    }} catch (error) {
+      console.error("Error fetching data:", error);
+    }
     navigate("/gri");
 
   }

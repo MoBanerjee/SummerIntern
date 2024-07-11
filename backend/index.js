@@ -211,7 +211,7 @@ const getMonthwiseResubData = (request, response) => {
   const query = `
       SELECT ym,status
       FROM forms
-      WHERE ym LIKE '${year}%' and buid LIKE'${bu}' and ( status='dl1' or status='dl2');
+      WHERE ym LIKE '${year}%' and buid LIKE'${bu}' and ( status='dl1' or status='dl2' or status='rectify');
   `;
 
   pool.query(query, (error, results) => {
@@ -1217,6 +1217,144 @@ const getFormStats = (request, response) => {
       response.status(200).json(stats);
   });
 };
+const raiseTicket = async (request, response) => {
+  try {
+    const reason = request.body.reason;
+    const bu = request.body.bus[0];
+    const year = request.body.year;
+    let month = request.body.month;
+    const doer = request.body.doer;
+
+    if (month < 10) {
+
+      month = '0' + String(month);
+    } else {
+      month = String(month);
+    }
+    const ym = String(year) + month;
+
+    const query = `
+          SELECT *
+          FROM forms 
+          WHERE ym = $1 AND buid = $2 AND status != 'saved'
+    `;
+
+    const queryParams = [ym, String(bu)];
+
+    const results = await pool.query(query, queryParams);
+
+    if (results.rows.length > 0) {
+      const query2 = `
+        INSERT INTO requests (bu, ym, reason) VALUES ($1, $2, $3)
+      `;
+      const query2Params = [String(bu), ym, reason];
+      
+      await pool.query(query2, query2Params);
+
+      const query3 = logquery;
+      let currentDate = new Date();
+      const query3Params = [currentDate, `Ticket raised for resubmission of form dated ${month}/${year} and belonging to BU ${bu}`, doer];
+
+      await pool.query(query3, query3Params);
+
+      response.status(200).send('Ticket raised successfully');
+    } else {
+      response.status(404).send('No forms found matching the criteria');
+    }
+  } catch (error) {
+    console.error('Server error:', error);
+    response.status(500).send('Internal Server Error');
+  }
+};
+const reviewReq= (request, response) => {
+  
+  const query = `
+      SELECT *
+             
+      FROM requests
+      where status=false
+      
+  `;
+
+  pool.query(query, (error, results) => {
+      if (error) {
+          console.error('Database error:', error);
+          response.status(500).send('Internal Server Error');
+          return;
+      }
+
+      response.status(200).json(results);
+  });
+};
+const acceptReq= (request, response) => {
+  rq=request.body.rqid
+  ym=request.body.ym
+  bu=request.body.bu
+  const query = `
+update requests set acceptance =true, status=true where rqid='${rq}';
+      
+  `;
+  const queryside = `
+  update forms set status='rectify' where ym='${ym}' and buid='${bu}';
+        
+    `;
+  const query2 = logquery;
+  let currentDate = new Date();
+
+    const params2 = [currentDate, 'Request with Request ID '+rq+" was accepted", 'Admin'];
+  pool.query(query, (error, results) => {
+      if (error) {
+          console.error('Database error:', error);
+          response.status(500).send('Internal Server Error');
+          return;
+      }
+      pool.query(queryside, (error, results) => {
+        if (error) {
+            console.error('Database error:', error);
+            response.status(500).send('Internal Server Error');
+            return;
+        }
+      pool.query(query2, params2, (error, results) => {
+        if (error) {
+            console.error('Database error:', error);
+            response.status(500).send('Internal Server Error');
+            return;
+        }
+
+        response.status(200).send("accepted")
+    });
+  })
+  });
+};
+const denyReq= (request, response) => {
+  rq=request.body.rqid
+  const query = `
+update requests set acceptance =false, status=true where rqid=${rq};
+      
+  `;
+  const query2 = logquery;
+  let currentDate = new Date();
+
+    const params2 = [currentDate, 'Request with Request ID '+rq+" was denied", 'Admin'];
+  pool.query(query, (error, results) => {
+      if (error) {
+          console.error('Database error:', error);
+          response.status(500).send('Internal Server Error');
+          return;
+      }
+      pool.query(query2, params2, (error, results) => {
+        if (error) {
+            console.error('Database error:', error);
+            response.status(500).send('Internal Server Error');
+            return;
+        }
+
+        response.status(200).send("denied")
+    });
+    
+  });
+};
+
 app.post('/getMonthwiseData',  cors(),getMonthwiseStatus);
 app.post('/createAccount',  cors(),createAccount);// logbook added
 app.post('/verifyAccount',  cors(),verifyAccount);// logbook added
@@ -1247,3 +1385,7 @@ app.post('/getLogs',cors(),fetchLogs);
 app.post('/getFormStatus',cors(),getFormStatus);
 app.post('/getFormStats',cors(),getFormStats);
 app.post('/makeLogEntry',cors(),makeLogEntry);
+app.post('/raiseTicket',cors(),raiseTicket);
+app.post('/reviewReq',cors(),reviewReq);
+app.post('/acceptReq',cors(),acceptReq);
+app.post('/denyReq',cors(),denyReq);

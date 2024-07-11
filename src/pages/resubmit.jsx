@@ -98,6 +98,7 @@ const getColorScheme = (state, theme) => {
 
     'Denied by Level 1': '#f07179',
     'Denied by Level 2': '#c20612',
+    'Reset for rectification':'#FFA500'
 
   };
 

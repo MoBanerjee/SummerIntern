@@ -6,12 +6,33 @@ import { tokens } from "../../theme";
 import { GRI303 } from "../../data/Entities";
 import Header from "../../components/Header";
 import { useTheme, styled } from "@mui/material/styles";
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 
 const Gri3 = ({editable}) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [edits, setEdits] = useState([]);
   const [data, setData] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
+  const handleFileChange = (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length > 0) {
+      setSelectedFiles(files);
+      files.forEach(file => saveFile(file));
+    }
+  };
+
+  const saveFile = (file) => {
+    const fileURL = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = fileURL;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(fileURL);
+  };
   useEffect(() => {
     let l=JSON.parse(localStorage.getItem("gri3"));
     if(l!=null)
@@ -111,11 +132,16 @@ const Gri3 = ({editable}) => {
           variant="contained"
           size="small"
 
-          startIcon={<CloudUploadIcon />}
-          disabled={params.row.id === 3 || params.row.id === 4 || !params.row.isApplicable || !editable} 
+          startIcon={editable?<CloudUploadIcon />:<CloudDownloadIcon />}
+          disabled={params.row.id === 3 || params.row.id === 4 || !params.row.isApplicable } 
         >
-          Upload Attachment
-          <VisuallyHiddenInput type="file" />
+      {editable?"Upload Attachment":"Download Attachment"}
+          <input
+          type="file"
+          hidden
+          multiple
+          onChange={handleFileChange}
+        />
         </Button>
       ),
     },

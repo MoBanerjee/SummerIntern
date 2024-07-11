@@ -9,8 +9,28 @@ import { useTheme } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { Box ,Button,Switch} from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 const Gri6 = ({editable}) => {
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
+  const handleFileChange = (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length > 0) {
+      setSelectedFiles(files);
+      files.forEach(file => saveFile(file));
+    }
+  };
+
+  const saveFile = (file) => {
+    const fileURL = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = fileURL;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(fileURL);
+  };
   const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
     clipPath: 'inset(50%)',
@@ -122,13 +142,18 @@ const Gri6 = ({editable}) => {
   component="label"
   role={undefined}
   variant="contained"
-  disabled={!params.row.isApplicable || !editable}
+  disabled={!params.row.isApplicable }
   tabIndex={-1}
-  startIcon={<CloudUploadIcon />}
+  startIcon={editable?<CloudUploadIcon />:<CloudDownloadIcon />}
   size="small"
 >
-  Upload Attachment
-  <VisuallyHiddenInput type="file" />
+{editable?"Upload Attachment":"Download Attachment"}
+  <input
+          type="file"
+          hidden
+          multiple
+          onChange={handleFileChange}
+        />
 </Button>
       ),
     },

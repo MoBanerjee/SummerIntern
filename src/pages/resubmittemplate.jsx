@@ -68,7 +68,9 @@ useEffect(() => {
       localStorage.setItem('state', JSON.stringify("Denied by Level 1"));
       else if( results.data.rows[0].status==="dl2")
       localStorage.setItem('state', JSON.stringify("Denied by Level 2"));
-
+      else if( results.data.rows[0].status==="rectify")
+      localStorage.setItem('state', JSON.stringify("Reset for rectification"));
+      
 
       
     } catch (error) {
@@ -89,7 +91,7 @@ useEffect(() => {
       let obj = results.data.rows[0];
 replaceMinusOneWithNA(obj);
       localStorage.setItem('gri'+i, JSON.stringify(obj));
-      
+      if(JSON.parse(localStorage.getItem("state"))=="Reset for rectification")continue;
   const rem = await axios.post(`http://localhost:3000/getRemarks`, {
             fid:f,
     
@@ -126,7 +128,8 @@ replaceMinusOneWithNA(obj);
         
 
 let stat=""
-if(row.status='dl1')stat='Denied by Level 1';
+if(row.status=='dl1')stat='Denied by Level 1';
+else if (row.status=="rectify")stat="Reset for rectification";
 else stat='Denied by Level 2';
         response=response.concat([{month: months[monthIndex], status: stat, openform: openform, remarks: '' ,mth:monthIndex+1}])
         
@@ -160,7 +163,7 @@ else stat='Denied by Level 2';
 
   return (
     <Container maxWidth="md">
-      <h1>Submitted Forms for Year: {year}</h1>
+      <h1>Forms for Resubmission for Year: {year}</h1>
       <div>
       <YearPicker onChange={setYear} minYear={2023} maxYear={2035} editable={false}/>
       </div>

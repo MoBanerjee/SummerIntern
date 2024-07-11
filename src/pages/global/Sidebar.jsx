@@ -14,7 +14,9 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import InsertChartIcon from '@mui/icons-material/InsertChart';
 import SeatriumLogo from "../../Assets/SeatriumLogo.png"
+import FlagIcon from '@mui/icons-material/Flag';
 import BookIcon from '@mui/icons-material/Book';
+import FeedbackIcon from '@mui/icons-material/Feedback';
 const Item = ({ title, to,state, icon, selected, setSelected,BU }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -185,6 +187,8 @@ const Sidebar = () => {
 </SubMenu>}
 {(role==="Admin") && <Item title="View Logbook" to="/log" icon={<BookIcon />} selected={selected} setSelected={setSelected} />}{/**view summary n dashboard*/}
 {(role==="Admin") && <Item title="Summary Report" to="/getpdf" icon={<SummarizeIcon />} selected={selected} setSelected={setSelected} />}   
+{(role==="Admin") && <Item title="Service Requests" to="/requestReview" icon={<FeedbackIcon />} selected={selected} setSelected={setSelected} />}   
+{(role==="Approver 1" || role==="User" ) && <Item title="Raise Service Request" to="/raiseTicket" icon={<FlagIcon />} selected={selected} setSelected={setSelected} />}   
           </Box>
         </Menu>
       </ProSidebar>

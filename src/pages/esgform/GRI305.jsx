@@ -9,7 +9,7 @@ import { styled } from '@mui/material/styles';
 import { Box ,Button,Switch} from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
-
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 const Gri5 = ({editable}) => {
   const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -27,6 +27,26 @@ const Gri5 = ({editable}) => {
 
   const [edits, setEdits] = useState([]);
   const [data, setData] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
+  const handleFileChange = (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length > 0) {
+      setSelectedFiles(files);
+      files.forEach(file => saveFile(file));
+    }
+  };
+
+  const saveFile = (file) => {
+    const fileURL = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = fileURL;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(fileURL);
+  };
   useEffect(() => {
     let l=JSON.parse(localStorage.getItem("gri5"));
     if(l!=null)
@@ -147,12 +167,17 @@ const Gri5 = ({editable}) => {
   role={undefined}
   variant="contained"
   tabIndex={-1}
-  disabled={!params.row.isApplicable || !editable}
-  startIcon={<CloudUploadIcon />}
+  disabled={!params.row.isApplicable }
+  startIcon={editable?<CloudUploadIcon />:<CloudDownloadIcon />}
   size="small"
 >
-  Upload Attachment
-  <VisuallyHiddenInput type="file" />
+{editable?"Upload Attachment":"Download Attachment"}
+  <input
+          type="file"
+          hidden
+          multiple
+          onChange={handleFileChange}
+        />
 </Button>
       ),
     },

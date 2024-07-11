@@ -2,7 +2,7 @@ import React from 'react';
 import { useField, useFormikContext } from 'formik';
 import { FormControl, InputLabel, Select, MenuItem, OutlinedInput } from '@mui/material';
 
-function CustomTextNumberDropdown({ name }) {
+function CustomTextNumberDropdown({ name ,mul=true, filter="all"}) {
   const { setFieldValue, values } = useFormikContext();
   const [field, meta] = useField(name);
   const currentError = meta.touched && meta.error;
@@ -13,7 +13,7 @@ function CustomTextNumberDropdown({ name }) {
     } = event;
     setFieldValue(name, typeof value === 'string' ? value.split(',') : value);
   };
-  const numberOptions = [
+ let numberOptions = [
     { value: 'B1', text: "SNE" },
     { value: 'B2', text: "SOGA" },
     { value: 'B3', text: "SPMI" },
@@ -31,14 +31,24 @@ function CustomTextNumberDropdown({ name }) {
     { value: 'B15', text: "PTK" },
     { value: 'B16', text: "EJA" }
   ];
-
+const filterBU=(filter)=>{
+  let temp=[]
+  numberOptions.map((ele)=>{
+    if(filter.includes(ele.value))
+    temp.push(ele)
+  })
+  return temp;
+}
+if (filter!="all"){
+  numberOptions=filterBU(filter);
+}
   return (
     <FormControl fullWidth error={!!currentError}>
       <InputLabel id={`${name}-label`}>Select BUs</InputLabel>
       <Select
         labelId={`${name}-label`}
         id={name}
-        multiple
+        multiple={mul}
         {...field}
         value={values[name]}
         onChange={handleChange}

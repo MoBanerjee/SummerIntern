@@ -28,6 +28,8 @@ import SubFormtemplate from "./pages/esgform/submittedforms";
 import ViewForms from "./pages/esgform/viewForms";
 import ViewFormsTemplate from "./pages/esgform/viewFormsTemplate";
 import Gri6 from "./pages/esgform/GRI306";
+import ServiceReq from "./pages/ServiceRequest";
+import ReviewReq from "./pages/RequestReview";
 function App() {
   const location = useLocation();
   const [theme, colorMode] = useMode();
@@ -78,6 +80,8 @@ function App() {
               <Route path="/resubmit" element={<Resubmit/>}/>
               <Route path="/getpdf" element={<Pdf/>}/>
               <Route path="/summary" element={<Summary/>}/>
+              <Route path="/raiseTicket" element={<ServiceReq/>}/>
+              <Route path="/requestReview" element={<ReviewReq/>}/>
             </Routes>
             <ToastContainer position='top-center' />
         </Box> 

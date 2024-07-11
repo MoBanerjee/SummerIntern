@@ -24,6 +24,8 @@ const getStatusStyle = (status) => {
                 return { backgroundColor: '#c20612' };
                 case 'Submitted- Yet to be Approved':
                   return { backgroundColor: '#f2d830' };
+                  case 'Reset for rectification':
+                    return { backgroundColor: '#FFA500'};
         default:
             return {};
     }
@@ -54,7 +56,7 @@ const DataGrid = ({ data }) => {
                   <IconButton color="success" disabled="true">
                     <CheckCircleIcon />
                   </IconButton>
-                ) : row.status === 'Yet to Start' || row.status === 'Yet To Start' || row.status === 'Yet to be Approved' || row.status === 'Denied by Level 1' ||  row.status === 'Denied by Level 2' ? (
+                ) : row.status === 'Yet to Start' || row.status === 'Yet To Start' || row.status === 'Yet to be Approved' || row.status === 'Denied by Level 1' ||  row.status === 'Denied by Level 2' || row.status === 'Denied by Level 1' ||  row.status === 'Reset for rectification' ? (
                   <IconButton color="error" onClick={() => row.openform(row.mth)} href=""> 
                     <ArrowCircleRightTwoToneIcon  />
                   </IconButton>
