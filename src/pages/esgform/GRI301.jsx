@@ -8,38 +8,11 @@ import { Box ,Button,Switch, Tooltip,tooltipClasses  } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
-import { toast } from 'react-toastify';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 function Gri1 ({editable}){
   const [tooltipText, setTooltipText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [open, setOpen] = React.useState(false);
-  const comUpdate = React.useRef("");
-
-
-  const handleClickOpen = () => {
-
-    setOpen(true);
-  };
-
-  const handleCloseEdit = () => {
-
-    setOpen(false);
-
-    comUpdate.current=""
-
-
-  };
-  const handleCloseConfirm = () => {
-
-    setOpen(false);
-
-  };
+  
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     if (files.length > 0) {
@@ -92,11 +65,10 @@ function Gri1 ({editable}){
   const colors = tokens(theme.palette.mode);
   const [edits, setEdits] = useState([]);
   const [data, setData] = useState([]);
-  const [flux, setFlux] = useState(false);
   const[holder,setHold] =useState([])
 
-  const [prev,setPrev]=useState("");
-  const[curr,setCurr]=useState("");
+  const [prev,setPrev]=useState(JSON.parse(localStorage.getItem("grip1")));
+  const curr =React.useRef("");
   useEffect(() => {
     let l=JSON.parse(localStorage.getItem("gri1"));
     if(l!=null)
@@ -127,18 +99,8 @@ function Gri1 ({editable}){
 
     
   }, [data]);
-useEffect(()=>{const fluxAnalysis=()=>{
-  if(comUpdate.current=="")return;
-  if(prev[comUpdate.current]!='N/A' && curr[comUpdate.current]=='N/A'){
-    setHold([curr[comUpdate.current]]);
-    handleClickOpen()
-    console.log("b4 pops: ",comUpdate.current)
-    
-    console.log("pops: ",comUpdate.current)
-  }
-}
-fluxAnalysis()
-},[comUpdate.current])
+
+
 
 
 
@@ -155,16 +117,13 @@ fluxAnalysis()
     else newData[id-1].amount=''
     
     let temp=JSON.parse(localStorage.getItem("gri1"))
-    let prev=JSON.parse(localStorage.getItem("grip1"))
+  
 
   
     switch(id){
       case 1: temp.rawsteel=!isApplicable?'N/A':"";
 
-      const y="rawsteel"
-      setPrev(prev);
-      setCurr(temp);
-      comUpdate.current=y
+
   
       break;
       case 2: temp.steelpipes=!isApplicable?'N/A':"";
@@ -233,17 +192,16 @@ fluxAnalysis()
       break;
     }
 
-   
 
- localStorage.setItem("gri1",JSON.stringify(temp))
-
-
- window.dispatchEvent(new Event('storageUpdated'));
+    localStorage.setItem("gri1",JSON.stringify(temp));
+    window.dispatchEvent(new Event('storageUpdated'));
     setData(newData);
   
     
   };
 
+ 
+  
   const handleEditCommit = React.useCallback(
     (params) => {
       const { id, field, value } = params;
@@ -257,7 +215,7 @@ fluxAnalysis()
         switch (edit.id) {
           case 1:
             temp.rawsteel = edit.value;
-            
+ 
             break;
           case 2:
             temp.steelpipes = edit.value;
@@ -295,10 +253,10 @@ fluxAnalysis()
             break;
         }
       });
-    
-   
-      localStorage.setItem('gri1', JSON.stringify(temp));
+      localStorage.setItem("gri1",JSON.stringify(curr.current));
       window.dispatchEvent(new Event('storageUpdated'));
+   
+
       
     },
     [edits]
@@ -416,27 +374,7 @@ fluxAnalysis()
             }}
           />
         </Box>
-        <Dialog
-        open={open}
         
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"Please check your entry!"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Last month {comUpdate.current} was not applicable but this month you have entered the value "{holder[0]}" for it. Are you sure that your entry is correct?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseEdit} autoFocus>Edit</Button>
-          <Button onClick={handleCloseConfirm}>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
       </Box>
       
     </>

@@ -8,8 +8,13 @@ import { useTheme } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { Box ,Button,Switch} from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+
 const Gri5 = ({editable}) => {
   const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -28,7 +33,71 @@ const Gri5 = ({editable}) => {
   const [edits, setEdits] = useState([]);
   const [data, setData] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const[holder,setHold] =useState([])
 
+  const [prev,setPrev]=useState(JSON.parse(localStorage.getItem("grip5")));
+  const curr =React.useRef("");
+  const [open, setOpen] = React.useState(false);
+  const tempBool=React.useRef(false);
+  const newD=React.useRef("");
+  const comUpdate = React.useRef("");
+
+
+  const handleClickOpen = () => {
+
+    setOpen(true);
+  };
+
+  const handleCloseEdit = () => {
+    
+      tempBool.current=false;
+
+    setOpen(false);
+
+    comUpdate.current=""
+
+
+  };
+  const handleCloseConfirm = () => {
+tempBool.current=false;
+localStorage.setItem("gri5",JSON.stringify(curr.current));
+window.dispatchEvent(new Event('storageUpdated'));
+setData(newD.current);
+
+    setOpen(false);
+
+  };
+  const fluxAnalysis=()=>{
+    if(comUpdate.current=="")return;
+  
+    if(prev[comUpdate.current]===curr.current[comUpdate.current] || curr.current[comUpdate.current]==null || curr.current[comUpdate.current]==""){
+      localStorage.setItem("gri5",JSON.stringify(curr.current));
+  window.dispatchEvent(new Event('storageUpdated'));
+  if(prev[comUpdate.current]=='N/A' || curr.current[comUpdate.current]=="N/A")
+  setData(newD.current);
+    }
+    else{
+      if(prev[comUpdate.current]!='N/A' && curr.current[comUpdate.current]!="N/A"){
+        const diff=Math.round((curr.current[comUpdate.current]-prev[comUpdate.current])*100/prev[comUpdate.current])
+        if(Math.abs(diff)<10){
+          localStorage.setItem("gri5",JSON.stringify(curr.current));
+          window.dispatchEvent(new Event('storageUpdated'));
+         
+          return;
+        }
+        else{
+          let compare="higher"
+          if(diff<0)compare='lesser';
+          const absdiff=Math.abs(diff);
+          setHold([prev[comUpdate.current],curr.current[comUpdate.current],absdiff,compare]);
+        }
+      }
+      else setHold([prev[comUpdate.current],curr.current[comUpdate.current]]);
+      tempBool.current=true;
+      handleClickOpen()
+    }
+  
+  }
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     if (files.length > 0) {
@@ -87,31 +156,50 @@ const Gri5 = ({editable}) => {
     if(!isApplicable) newData[id-1].amount='N/A';
     else newData[id-1].amount=''
     let temp=JSON.parse(localStorage.getItem("gri5"))
+    newD.current=newData;
     switch(id){
       case 1: temp.co2=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="co2"
       break;
       case 2: temp.r22=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="r22"
       break;
       case 3: temp.r32=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="r32"
       break;
       case 4: temp.r34a=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="r34a"
       break;
       case 5: temp.r410a=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="r410a"
       break;
       case 6: temp.r404a=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="r404a"
       break;
       case 7: temp.r407c=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="r407c"
       break;
       case 8: temp.r134a=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="r134a"
       break;
       case 9: temp.r141b=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="r141b"
       break;
       case 10: temp.r600=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="r600"
       break;
     }
- localStorage.setItem("gri5",JSON.stringify(temp))
- window.dispatchEvent(new Event('storageUpdated'));
-    setData(newData);
+    fluxAnalysis();
   };
   
   const handleEditCommit = React.useCallback(
@@ -121,32 +209,52 @@ const Gri5 = ({editable}) => {
       newEdits.push({ id, field, value });
 
       let temp = JSON.parse(localStorage.getItem('gri5'));
+      newD.current=newEdits;
       newEdits.forEach((edit) => {
         switch (edit.id) {
           case 1: temp.co2=edit.value;
+          curr.current=temp;
+          comUpdate.current="co2"
           break;
           case 2: temp.r22=edit.value;
+          curr.current=temp;
+          comUpdate.current="r22"
           break;
           case 3: temp.r32=edit.value;
+          curr.current=temp;
+          comUpdate.current="r32"
           break;
           case 4: temp.r34a=edit.value;
+          curr.current=temp;
+          comUpdate.current="r34a"
           break;
           case 5: temp.r410a=edit.value;
+          curr.current=temp;
+          comUpdate.current="r410a"
           break;
           case 6: temp.r404a=edit.value;
+          curr.current=temp;
+          comUpdate.current="r404a"
           break;
           case 7: temp.r407c=edit.value;
+          curr.current=temp;
+          comUpdate.current="r407c"
           break;
           case 8: temp.r134a=edit.value;
+          curr.current=temp;
+          comUpdate.current="r134a"
           break;
           case 9: temp.r141b=edit.value;
+          curr.current=temp;
+          comUpdate.current="r141b"
           break;
           case 10: temp.r600=edit.value;
+          curr.current=temp;
+          comUpdate.current="r600"
           break;
         }
       });
-      localStorage.setItem('gri5', JSON.stringify(temp));
-      window.dispatchEvent(new Event('storageUpdated'));
+      fluxAnalysis();
       
     },
     [edits]
@@ -257,6 +365,27 @@ const Gri5 = ({editable}) => {
             }}
           />
         </Box>
+        <Dialog
+        open={open}
+        
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          <h1>Please check your entry!</h1>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            <h2>Last month, the value of {comUpdate.current} was "{holder[0]}" but this month you are entering the value "{holder[1]}" for it. {holder.length>2 && "Your value for this month is "+holder[2]+"% "+holder[3]+" than for last month. "} Are you sure that your entry is correct?</h2>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEdit} autoFocus>Edit</Button>
+          <Button onClick={handleCloseConfirm}>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
       </Box>
       <>
       

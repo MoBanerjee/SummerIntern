@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import { useTheme } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { Box ,Button,Switch, TextField, IconButton, MenuItem, Select, FormControl, InputLabel} from '@mui/material';
-import Dialog from '@mui/material/Dialog';
+
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AddIcon from '@mui/icons-material/Add';
@@ -17,6 +17,9 @@ import RemoveIcon from '@mui/icons-material/RemoveCircle';
 import SaveIcon from '@mui/icons-material/Save';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogTitle from '@mui/material/DialogTitle';
 const customContentStyle = {
   width: '200%',
   maxWidth: 'none',
@@ -61,7 +64,69 @@ const Gri2 = ({editable}) => {
 
   const [fields, setFields] = useState(JSON.parse(localStorage.getItem('gri2')).biodiesel==null?[]:JSON.parse(localStorage.getItem('gri2')).biodiesel);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const[holder,setHold] =useState([])
 
+  const [prev,setPrev]=useState(JSON.parse(localStorage.getItem("grip3")));
+  const curr =React.useRef("");
+  const [openA, setOpenA] = React.useState(false);
+  const tempBool=React.useRef(false);
+  const newD=React.useRef("");
+  const comUpdate = React.useRef("");
+  const handleClickOpenA= () => {
+
+    setOpenA(true);
+  };
+
+  const handleCloseEdit = () => {
+    
+      tempBool.current=false;
+
+    setOpenA(false);
+
+    comUpdate.current=""
+
+
+  };
+  const handleCloseConfirm = () => {
+tempBool.current=false;
+localStorage.setItem("gri3",JSON.stringify(curr.current));
+window.dispatchEvent(new Event('storageUpdated'));
+setData(newD.current);
+
+    setOpenA(false);
+
+  };
+  const fluxAnalysis=()=>{
+    if(comUpdate.current=="")return;
+  
+    if(prev[comUpdate.current]===curr.current[comUpdate.current] || curr.current[comUpdate.current]==null || curr.current[comUpdate.current]==""){
+      localStorage.setItem("gri3",JSON.stringify(curr.current));
+  window.dispatchEvent(new Event('storageUpdated'));
+  if(prev[comUpdate.current]=='N/A' || curr.current[comUpdate.current]=="N/A")
+  setData(newD.current);
+    }
+    else{
+      if(prev[comUpdate.current]!='N/A' && curr.current[comUpdate.current]!="N/A"){
+        const diff=Math.round((curr.current[comUpdate.current]-prev[comUpdate.current])*100/prev[comUpdate.current])
+        if(Math.abs(diff)<10){
+          localStorage.setItem("gri3",JSON.stringify(curr.current));
+          window.dispatchEvent(new Event('storageUpdated'));
+         
+          return;
+        }
+        else{
+          let compare="higher"
+          if(diff<0)compare='lesser';
+          const absdiff=Math.abs(diff);
+          setHold([prev[comUpdate.current],curr.current[comUpdate.current],absdiff,compare]);
+        }
+      }
+      else setHold([prev[comUpdate.current],curr.current[comUpdate.current]]);
+      tempBool.current=true;
+      handleClickOpenA()
+    }
+  
+  }
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     if (files.length > 0) {
@@ -512,7 +577,27 @@ const Gri2 = ({editable}) => {
   </DialogContent>
 </Dialog>
 
-
+<Dialog
+        open={openA}
+        
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          <h1>Please check your entry!</h1>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            <h2>Last month, the value of {comUpdate.current} was "{holder[0]}" but this month you are entering the value "{holder[1]}" for it. {holder.length>2 && "Your value for this month is "+holder[2]+"% "+holder[3]+" than for last month. "} Are you sure that your entry is correct?</h2>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEdit} autoFocus>Edit</Button>
+          <Button onClick={handleCloseConfirm}>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
       </Box>
     </>
   );

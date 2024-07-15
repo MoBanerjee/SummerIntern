@@ -10,9 +10,48 @@ import { styled } from '@mui/material/styles';
 import { Box ,Button,Switch} from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
 const Gri6 = ({editable}) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const[holder,setHold] =useState([])
 
+  const [prev,setPrev]=useState(JSON.parse(localStorage.getItem("grip6")));
+  const curr =React.useRef("");
+  const [open, setOpen] = React.useState(false);
+  const tempBool=React.useRef(false);
+  const newD=React.useRef("");
+  const comUpdate = React.useRef("");
+
+
+  const handleClickOpen = () => {
+
+    setOpen(true);
+  };
+
+  const handleCloseEdit = () => {
+    
+      tempBool.current=false;
+
+    setOpen(false);
+
+    comUpdate.current=""
+
+
+  };
+  const handleCloseConfirm = () => {
+tempBool.current=false;
+localStorage.setItem("gri6",JSON.stringify(curr.current));
+window.dispatchEvent(new Event('storageUpdated'));
+setData(newD.current);
+
+    setOpen(false);
+
+  };
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     if (files.length > 0) {
@@ -74,7 +113,37 @@ const Gri6 = ({editable}) => {
 
     
   }, [data]);
-
+  const fluxAnalysis=()=>{
+    if(comUpdate.current=="")return;
+  
+    if(prev[comUpdate.current]===curr.current[comUpdate.current] || curr.current[comUpdate.current]==null || curr.current[comUpdate.current]==""){
+      localStorage.setItem("gri6",JSON.stringify(curr.current));
+  window.dispatchEvent(new Event('storageUpdated'));
+  if(prev[comUpdate.current]=='N/A' || curr.current[comUpdate.current]=="N/A")
+  setData(newD.current);
+    }
+    else{
+      if(prev[comUpdate.current]!='N/A' && curr.current[comUpdate.current]!="N/A"){
+        const diff=Math.round((curr.current[comUpdate.current]-prev[comUpdate.current])*100/prev[comUpdate.current])
+        if(Math.abs(diff)<10){
+          localStorage.setItem("gri6",JSON.stringify(curr.current));
+          window.dispatchEvent(new Event('storageUpdated'));
+         
+          return;
+        }
+        else{
+          let compare="higher"
+          if(diff<0)compare='lesser';
+          const absdiff=Math.abs(diff);
+          setHold([prev[comUpdate.current],curr.current[comUpdate.current],absdiff,compare]);
+        }
+      }
+      else setHold([prev[comUpdate.current],curr.current[comUpdate.current]]);
+      tempBool.current=true;
+      handleClickOpen()
+    }
+  
+  }
   const handleApplicabilityChange = (id, isApplicable) => {
     const newData = data.map(row => {
       if (row.id === id) {
@@ -86,19 +155,27 @@ const Gri6 = ({editable}) => {
     if(!isApplicable) newData[id-1].amount='N/A';
     else newData[id-1].amount=''
     let temp=JSON.parse(localStorage.getItem("gri6"))
+    newD.current=newData;
     switch(id){
       case 1: temp.hazwastefrdisposal=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="hazwastefrdisposal"
       break;
       case 2: temp.nonhazwastefrincineration=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="nonhazwastefrincineration"
       break;
       case 3: temp.nonhazwastefrlandfill=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="nonhazwastefrlandfill"
       break;
       case 4: temp.nonhazwastefroffsiterecycling=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="nonhazwastefroffsiterecycling"
+
       break;
     }
- localStorage.setItem("gri6",JSON.stringify(temp))
- window.dispatchEvent(new Event('storageUpdated'));
-    setData(newData);
+    fluxAnalysis();
   };
   
   const handleEditCommit = React.useCallback(
@@ -108,20 +185,28 @@ const Gri6 = ({editable}) => {
       newEdits.push({ id, field, value });
 
       let temp = JSON.parse(localStorage.getItem('gri6'));
+      newD.current=newEdits;
       newEdits.forEach((edit) => {
         switch (edit.id) {
           case 1: temp.hazwastefrdisposal=edit.value;
+          curr.current=temp;
+          comUpdate.current="hazwastefrdisposal"
           break;
           case 2: temp.nonhazwastefrincineration=edit.value;
+          curr.current=temp;
+          comUpdate.current="nonhazwastefrincineration"
           break;
           case 3: temp.nonhazwastefrlandfill=edit.value;
+          curr.current=temp;
+          comUpdate.current="nonhazwastefrlandfill"
           break;
           case 4: temp.nonhazwastefroffsiterecycling=edit.value;
+          curr.current=temp;
+          comUpdate.current="nonhazwastefroffsiterecycling"
           break;
         }
       });
-      localStorage.setItem('gri6', JSON.stringify(temp));
-      window.dispatchEvent(new Event('storageUpdated'));
+      fluxAnalysis();
       
     },
     [edits]
@@ -233,6 +318,27 @@ const Gri6 = ({editable}) => {
             }}
           />
         </Box>
+        <Dialog
+        open={open}
+        
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          <h1>Please check your entry!</h1>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            <h2>Last month, the value of {comUpdate.current} was "{holder[0]}" but this month you are entering the value "{holder[1]}" for it. {holder.length>2 && "Your value for this month is "+holder[2]+"% "+holder[3]+" than for last month. "} Are you sure that your entry is correct?</h2>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEdit} autoFocus>Edit</Button>
+          <Button onClick={handleCloseConfirm}>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
       </Box>
     </>
   );

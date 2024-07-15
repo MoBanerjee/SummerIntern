@@ -7,6 +7,11 @@ import { GRI303 } from "../../data/Entities";
 import Header from "../../components/Header";
 import { useTheme, styled } from "@mui/material/styles";
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 const Gri3 = ({editable}) => {
   const theme = useTheme();
@@ -14,7 +19,72 @@ const Gri3 = ({editable}) => {
   const [edits, setEdits] = useState([]);
   const [data, setData] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const[holder,setHold] =useState([])
 
+  const [prev,setPrev]=useState(JSON.parse(localStorage.getItem("grip3")));
+  const curr =React.useRef("");
+  const [open, setOpen] = React.useState(false);
+  const tempBool=React.useRef(false);
+  const newD=React.useRef("");
+  const comUpdate = React.useRef("");
+
+
+  const handleClickOpen = () => {
+
+    setOpen(true);
+  };
+
+  const handleCloseEdit = () => {
+    
+      tempBool.current=false;
+
+    setOpen(false);
+
+    comUpdate.current=""
+
+
+  };
+  const handleCloseConfirm = () => {
+tempBool.current=false;
+localStorage.setItem("gri3",JSON.stringify(curr.current));
+window.dispatchEvent(new Event('storageUpdated'));
+setData(newD.current);
+
+    setOpen(false);
+
+  };
+
+  const fluxAnalysis=()=>{
+    if(comUpdate.current=="")return;
+  
+    if(prev[comUpdate.current]===curr.current[comUpdate.current] || curr.current[comUpdate.current]==null || curr.current[comUpdate.current]==""){
+      localStorage.setItem("gri3",JSON.stringify(curr.current));
+  window.dispatchEvent(new Event('storageUpdated'));
+  if(prev[comUpdate.current]=='N/A' || curr.current[comUpdate.current]=="N/A")
+  setData(newD.current);
+    }
+    else{
+      if(prev[comUpdate.current]!='N/A' && curr.current[comUpdate.current]!="N/A"){
+        const diff=Math.round((curr.current[comUpdate.current]-prev[comUpdate.current])*100/prev[comUpdate.current])
+        if(Math.abs(diff)<10){
+          localStorage.setItem("gri3",JSON.stringify(curr.current));
+          window.dispatchEvent(new Event('storageUpdated'));
+         
+          return;
+        }
+        else{
+          let compare="higher"
+          if(diff<0)compare='lesser';
+          const absdiff=Math.abs(diff);
+          setHold([prev[comUpdate.current],curr.current[comUpdate.current],absdiff,compare]);
+        }
+      }
+      else setHold([prev[comUpdate.current],curr.current[comUpdate.current]]);
+      tempBool.current=true;
+      handleClickOpen()
+    }
+  
+  }
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     if (files.length > 0) {
@@ -67,19 +137,26 @@ const Gri3 = ({editable}) => {
     if(!isApplicable) newData[id-1].amount='N/A';
     else newData[id-1].amount=''
     let temp=JSON.parse(localStorage.getItem("gri3"))
+    newD.current=newData;
     switch(id){
       case 1: temp.surfacewater=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="surfacewater"
       break;
       case 2: temp.groundwater=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="groundwater"
       break;
       case 5: temp.thirdpartywaterpotable=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="thirdpartywaterpotable"
       break;
       case 6: temp.thirdpartywaternewaterordesal=!isApplicable?'N/A':"";
+      curr.current=temp;
+      comUpdate.current="thirdpartywaternewaterordesal"
       break;
     }
- localStorage.setItem("gri3",JSON.stringify(temp))
- window.dispatchEvent(new Event('storageUpdated'));
-    setData(newData);
+    fluxAnalysis();
   };
   
   const handleEditCommit = React.useCallback(
@@ -89,20 +166,32 @@ const Gri3 = ({editable}) => {
       newEdits.push({ id, field, value });
 
       let temp = JSON.parse(localStorage.getItem('gri3'));
+      newD.current=newEdits;
       newEdits.forEach((edit) => {
         switch (edit.id) {
           case 1: temp.surfacewater=edit.value;
+         
+     
+          curr.current=temp;
+          comUpdate.current="surfacewater"
           break;
           case 2: temp.groundwater=edit.value;
+      
+     
+          curr.current=temp;
+          comUpdate.current="groundwater"
           break;
           case 5: temp.thirdpartywaterpotable=edit.value;
+          curr.current=temp;
+          comUpdate.current="thirdpartywaterpotable"
           break;
           case 6: temp.thirdpartywaternewaterordesal=edit.value;
+          curr.current=temp;
+          comUpdate.current="thirdpartywaternewaterordesal"
           break;
         }
       });
-      localStorage.setItem('gri3', JSON.stringify(temp));
-      window.dispatchEvent(new Event('storageUpdated'));
+      fluxAnalysis();
       
     },
     [edits]
@@ -219,6 +308,27 @@ const Gri3 = ({editable}) => {
           }}
         />
       </Box>
+      <Dialog
+        open={open}
+        
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          <h1>Please check your entry!</h1>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            <h2>Last month, the value of {comUpdate.current} was "{holder[0]}" but this month you are entering the value "{holder[1]}" for it. {holder.length>2 && "Your value for this month is "+holder[2]+"% "+holder[3]+" than for last month. "} Are you sure that your entry is correct?</h2>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEdit} autoFocus>Edit</Button>
+          <Button onClick={handleCloseConfirm}>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
