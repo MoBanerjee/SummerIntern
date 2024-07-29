@@ -1,11 +1,10 @@
+import {verifyToken} from './middleware/jwtMiddleware.js'
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors');
-const { number } = require('yup');
-const { google } = require('googleapis');
 const app = express()
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
 const Pool = require('pg').Pool
 const pool = new Pool({
   user: 'mohor',
@@ -926,6 +925,9 @@ const verifyAccount = (request, response) => {
             response.status(500).send('Internal Server Error');
             return;
         }
+        const token = jwt.sign({ userId: email }, process.env.SECRET_KEY, {
+          expiresIn: '1h',
+          });
         if(results.rows.length>0){
           const query2 = logquery;
           const params2 = [currentDate, 'Successful Login', email];
@@ -939,7 +941,8 @@ const verifyAccount = (request, response) => {
             
         }
         );
-        response.status(200).send(results.rows);
+        response.status(200).send({rows: results.rows,
+          token: token});
         }
       else {
         const query2 = logquery;
@@ -1355,37 +1358,37 @@ update requests set acceptance =false, status=true where rqid=${rq};
   });
 };
 
-app.post('/getMonthwiseData',  cors(),getMonthwiseStatus);
-app.post('/createAccount',  cors(),createAccount);// logbook added
-app.post('/verifyAccount',  cors(),verifyAccount);// logbook added
-app.post('/getFormData',  cors(),getFormData);// add logbook
-app.post('/getgri1',  cors(),gri1);
-app.post('/getgri2',  cors(),gri2);
-app.post('/getgri3',  cors(),gri3);
-app.post('/getgri5',  cors(),gri5);
-app.post('/getgri6',  cors(),gri6);
-app.post('/createnewform',  cors(),createNewForm);//  
-app.post('/submitForm',  cors(),updateForms);
-app.post('/submitFormRe',  cors(),updateFormsRe);// add logbook
-app.post('/approveForm',  cors(),approveForm);// add logbook
-app.post('/denyForm',  cors(),denyForm);// add logbook
-app.post('/submitRemark',  cors(),submitRemark);// add logbook
-app.post('/resolveRemark',  cors(),resolveRemark);
-app.post('/getMonthwiseADData',  cors(),getMonthwiseADData);
-app.post('/getMonthwiseSubData',  cors(),getMonthwiseSubData);
-app.post('/getMonthwiseResubData',  cors(),getMonthwiseResubData);
-app.post('/getRemarks',  cors(),getRemarks);
-app.post('/checkEmail',cors(),checkEmail);
-app.post('/deleteProfile',cors(),deleteProfile);// logbook added
-app.post('/forgotPassword', cors(), forgotPassword);
-app.post('/resetPassword', cors(), resetPassword);
-app.post('/fetchDeniedForms',cors(),fetchDeniedForms);
-app.post('/fetchMissedForms',cors(),fetchMissedForms);
-app.post('/getLogs',cors(),fetchLogs);
-app.post('/getFormStatus',cors(),getFormStatus);
-app.post('/getFormStats',cors(),getFormStats);
-app.post('/makeLogEntry',cors(),makeLogEntry);
-app.post('/raiseTicket',cors(),raiseTicket);
-app.post('/reviewReq',cors(),reviewReq);
-app.post('/acceptReq',cors(),acceptReq);
-app.post('/denyReq',cors(),denyReq);
+app.post('/getMonthwiseData',  verifyToken, cors(),getMonthwiseStatus);
+app.post('/createAccount', verifyToken, cors(),createAccount);
+app.post('/verifyAccount', verifyToken, cors(),verifyAccount);
+app.post('/getFormData', verifyToken, cors(),getFormData);
+app.post('/getgri1', verifyToken,  cors(),gri1);
+app.post('/getgri2', verifyToken, cors(),gri2);
+app.post('/getgri3', verifyToken,  cors(),gri3);
+app.post('/getgri5',  verifyToken,cors(),gri5);
+app.post('/getgri6', verifyToken, cors(),gri6);
+app.post('/createnewform',verifyToken,  cors(),createNewForm); 
+app.post('/submitForm', verifyToken, cors(),updateForms);
+app.post('/submitFormRe',verifyToken,  cors(),updateFormsRe);
+app.post('/approveForm', verifyToken, cors(),approveForm);
+app.post('/denyForm', verifyToken, cors(),denyForm);
+app.post('/submitRemark', verifyToken, cors(),submitRemark);
+app.post('/resolveRemark',  verifyToken,cors(),resolveRemark);
+app.post('/getMonthwiseADData', verifyToken, cors(),getMonthwiseADData);
+app.post('/getMonthwiseSubData', verifyToken, cors(),getMonthwiseSubData);
+app.post('/getMonthwiseResubData',verifyToken,  cors(),getMonthwiseResubData);
+app.post('/getRemarks', verifyToken, cors(),getRemarks);
+app.post('/checkEmail',verifyToken,cors(),checkEmail);
+app.post('/deleteProfile',verifyToken,cors(),deleteProfile);
+app.post('/forgotPassword',verifyToken, cors(), forgotPassword);
+app.post('/resetPassword',verifyToken, cors(), resetPassword);
+app.post('/fetchDeniedForms',verifyToken,cors(),fetchDeniedForms);
+app.post('/fetchMissedForms',verifyToken,cors(),fetchMissedForms);
+app.post('/getLogs',verifyToken,cors(),fetchLogs);
+app.post('/getFormStatus',verifyToken,cors(),getFormStatus);
+app.post('/getFormStats',verifyToken,cors(),getFormStats);
+app.post('/makeLogEntry',verifyToken,cors(),makeLogEntry);
+app.post('/raiseTicket',verifyToken,cors(),raiseTicket);
+app.post('/reviewReq',verifyToken,cors(),reviewReq);
+app.post('/acceptReq',verifyToken,cors(),acceptReq);
+app.post('/denyReq',verifyToken,cors(),denyReq);
