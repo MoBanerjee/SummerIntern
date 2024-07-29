@@ -1,16 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from '@mui/material';
-import YearPicker from '../../components/YearPicker';
+import YearPicker from '../../components/selections/YearPicker';
 import { useNavigate } from 'react-router-dom';
-import DataGrid from '../../components/DataGrid';
+import DataGrid from '../../components/esgform/DataGrid';
 import axios from 'axios';
+import fidContext from '../../context/FormIDContext'
+import ManhoursContext from '../../context/ManhoursContext'
+import UserContext from '../../context/UserContext'
+
+import StateContext from '../../context/StateContext'
+import YMContext from '../../context/YMContext'
+import CurrentBUContext from '../../context/CurrentBUContext'
+import Gri1Context from '../../context/Gri1Context'
+import Gri2Context from '../../context/Gri2Context'
+import Gri3Context from '../../context/Gri3Context'
+import Gri5Context from '../../context/Gri5Context'
+import Gri6Context from '../../context/Gri6Context'
+import APIManager from '../../APIManager/APIManager'
+
+const {fid, setfid}=useContext(fidContext);
+const {manhours,setmanhours}=useContext(ManhoursContext);
+const {currentBu,setcurrentBu}=useContext(CurrentBUContext);
+const {state,setstate}=useState(StateContext)
+const {ym,setym}=useState(YMContext)
+const {user,setuser}=useContext(UserContext);
+const {gri1,setgri1}=useContext(Gri1Context);
+const {gri2,setgri2}=useContext(Gri2Context);
+const {gri3,setgri3}=useContext(Gri3Context);
+const {gri5,setgri5}=useContext(Gri5Context);
+const {gri6,setgri6}=useContext(Gri6Context);
 
 function SubFormTemplate() {
   const navigate = useNavigate();
   let currentM=new Date().getMonth();
   let start=currentM===0?new Date().getFullYear()-1: new Date().getFullYear();
-  const [year, setYear] = useState(JSON.parse(localStorage.getItem('ym'))===null?start:JSON.parse(localStorage.getItem('ym')).slice(0, 4));
-  const userinfo = JSON.parse(localStorage.getItem("user"))|| [];
+  const [year, setYear] = useState(ym===null?start:ym.slice(0, 4));
+  const userinfo = user|| [];
   const role = userinfo[0].role 
   const [data, setData] = useState([]);
   function replaceMinusOneWithNA(obj) {
@@ -21,16 +46,14 @@ function SubFormTemplate() {
     }
 }
 function clearStorage(){
-  localStorage.setItem('fid',null);
-  localStorage.setItem('manhours',null);
-
-  localStorage.setItem('ym',null);
-  localStorage.setItem('gri1',null);
-  localStorage.setItem('gri2',null);
-  localStorage.setItem('gri3',null);
-  localStorage.setItem('gri5',null);
-  localStorage.setItem('gri6',null);
-
+  setfid(null);
+  setmanhours(null);
+  setym(null)
+  setgri1(null);
+  setgri2(null);
+  setgri3(null);
+  setgri5(null);
+  setgri6(null);
 }
 useEffect(() => {
     
@@ -42,41 +65,40 @@ useEffect(() => {
   const openform= async(m)=>{
     if(m%10===m){
     m=m.toString();
-    localStorage.setItem('ym', JSON.stringify(year+'0'+m));}
+  setym(year+'0'+m)
+  }
     else{
       m=m.toString();
-      localStorage.setItem('ym', JSON.stringify(year+m));
+      setym(year+m)
     }
     try {
       
-      const results = await axios.post(`http://localhost:3000/getFormData`, {
-        ymonth:JSON.parse(localStorage.getItem(
-          "ym"
-          )),
-        bu:JSON.parse(localStorage.getItem(
-          "currentBu"
-          )),
-          doer:JSON.parse(localStorage.getItem("user"))[0].email,
-          category:"viewing"
-      });
- 
+      const results = 
+ APIManager.getFormData({
+  ymonth:ym,
+  bu:currentBu,
+    doer:user[0].email,
+    category:"viewing"
+ })
         let obj=results.data.rows[0].manhours;
         if(obj==-1)obj='N/A';
-        localStorage.setItem('state', JSON.stringify(""));
-      localStorage.setItem('fid', JSON.stringify(results.data.rows[0].fid));
+        setstate("")
+     
+      setfid(results.data.rows[0].fid)
       if(results.data.rows[0].status==="dl1" )
-      localStorage.setItem('state', JSON.stringify("Denied by Level 1"));
+      setstate("Denied by Level 1")
       else if( results.data.rows[0].status==="dl2")
-      localStorage.setItem('state', JSON.stringify("Denied by Level 2"));
+      setstate("Denied by Level 2")
       else if(results.data.rows[0].status==="al1" )
-      localStorage.setItem('state', JSON.stringify("Approved by Level 1"));
+      setstate("Approved by Level 1")
       else if(results.data.rows[0].status==="al2")
-      localStorage.setItem('state', JSON.stringify("Received by Level 2"));
+      setstate("Received by Level 2")
       else if(results.data.rows[0].status==="submitted")
-      localStorage.setItem('state', JSON.stringify("Submitted but not approved"));
+      setstate("Submitted but not approved")
       else if( results.data.rows[0].status==="rectify")
-      localStorage.setItem('state', JSON.stringify("Reset for rectification"));
-      localStorage.setItem('manhours', JSON.stringify(obj));
+      setstate("Reset for rectification")
+      setmanhours(obj)
+
 
 
 
@@ -86,19 +108,29 @@ useEffect(() => {
     }
 
     try {
-      const f=JSON.parse(localStorage.getItem(
-        "fid"
-        ));
+      const f=fid
         let results=""
       for(let i=1;i<7;i++){
         if(i===4)continue;
-       results = await axios.post(`http://localhost:3000/getgri${i}`, {
+       results =       APIManager[`getgri${i}`]({
         fid:f,
-
-      });
+      })
       let obj = results.data.rows[0];
 replaceMinusOneWithNA(obj);
-      localStorage.setItem('gri'+i, JSON.stringify(obj));
+switch(i){
+  case 1: setgri1(obj);
+  break;
+  case 2:setgri2(obj);
+  break;
+  case 3: setgri3(obj);
+  break;
+  case 5:setgri5(obj);
+  break;
+  case 6:setgri6(obj);
+  break;
+}
+
+ 
       
 
 
@@ -107,16 +139,13 @@ replaceMinusOneWithNA(obj);
       console.error("Error fetching data:", error);
     }
     
-    if(JSON.parse(localStorage.getItem('state'))=="Denied by Level 1" || JSON.parse(localStorage.getItem('state'))=="Denied by Level 2" ){
-        const f=JSON.parse(localStorage.getItem(
-            "fid"
-            
-            ));
-    const results = await axios.post(`http://localhost:3000/getRemarks`, {
-                fid:f,
-        
-              });
-    localStorage.setItem('remark', JSON.stringify(results.data.rows[0].remark));
+    if(state=="Denied by Level 1" || state=="Denied by Level 2" ){
+        const f=fid
+    const results = 
+    APIManager.getRemarks({
+      fid:f,
+    })
+    setremark(results.data.rows[0].remark)
             
 
     }
@@ -129,13 +158,12 @@ replaceMinusOneWithNA(obj);
         let t="1"
         if(role==="Approver 2")t="2"
      
-      const results = await axios.post(`http://localhost:3000/getMonthwiseADData`, {
+      const results = 
+      APIManager.getMonthwiseADData({
         year:year.toString(),
-        bu:JSON.parse(localStorage.getItem(
-          "currentBu"
-          )),
+        bu:currentBu,
         type:t
-      });
+      })
      
 
       let response=[];
@@ -169,9 +197,7 @@ replaceMinusOneWithNA(obj);
     
 
     fetchData();
-  }, [localStorage.getItem(
-    "currentBu"
-    )]);
+  }, [currentBu]);
 
   useEffect(() => {
     

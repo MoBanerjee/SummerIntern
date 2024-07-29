@@ -16,9 +16,10 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-import Heatmap from '../components/Heatmap';
-import Donut from '../components/Donut';
+import Heatmap from '../components/report/Heatmap';
+import Donut from '../components/report/Donut';
 import axios from 'axios';
+import APIManager from '../APIManager/APIManager'
 
 const generateYearMonthCombinations = () => {
   const currentDate = new Date();
@@ -51,8 +52,8 @@ const generateAllPossibleCombinations = () => {
 
 const fetchDeniedForms = async () => {
   try {
-    const response = await axios.post('http://localhost:3000/fetchDeniedForms', {});
-
+    const response =
+    APIManager.fetchDeniedForms({})
     if (response.status === 200) {
       const deniedForms = response.data.rows;
       let rows = [];
@@ -74,8 +75,8 @@ const fetchDeniedForms = async () => {
 
 const fetchUnsubmittedForms = async () => {
   try {
-    const response = await axios.post('http://localhost:3000/fetchMissedForms');
-
+    const response = 
+APIManager.fetchMissedForms({})
     if (response.status === 200) {
       const submittedForms = response.data.rows;
       const submittedCombinations = submittedForms.map((form) => ({

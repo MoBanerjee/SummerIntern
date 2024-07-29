@@ -3,8 +3,7 @@ import React,{useState,useEffect} from 'react';
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { GRI306 } from "../../data/Entities";
-import { Load} from "../../data/Entities";
-import Header from "../../components/Header";
+import Header from "../../components/ui/Header";
 import { useTheme } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { Box ,Button,Switch} from '@mui/material';
@@ -15,12 +14,16 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Gri6Context from '../../context/Gri6Context'
+import Grip6Context from '../../context/Grip6Context'
+const {gri6,setgri6}=useContext(Gri6Context);
 
+const {grip6,setgrip6}=useContext(Grip6Context);
 const Gri6 = ({editable}) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const[holder,setHold] =useState([])
 
-  const [prev,setPrev]=useState(JSON.parse(localStorage.getItem("grip6")));
+  const [prev,setPrev]=useState(grip6);
   const curr =React.useRef("");
   const [open, setOpen] = React.useState(false);
   const tempBool=React.useRef(false);
@@ -45,7 +48,7 @@ const Gri6 = ({editable}) => {
   };
   const handleCloseConfirm = () => {
 tempBool.current=false;
-localStorage.setItem("gri6",JSON.stringify(curr.current));
+setgri6(curr.current)
 window.dispatchEvent(new Event('storageUpdated'));
 setData(newD.current);
 
@@ -86,9 +89,9 @@ setData(newD.current);
   const [edits, setEdits] = useState([]);
   const [data, setData] = useState([]);
   useEffect(() => {
-    let l=JSON.parse(localStorage.getItem("gri6"));
+    let l=gri6
     if(l!=null)
-    l=Object.entries(JSON.parse(localStorage.getItem("gri6")));
+    l=Object.entries(gri6);
     const enhancedData = GRI306.map(row => ({
       ...row,
       amount:l===null?"" : l[row.id][1],
@@ -100,9 +103,9 @@ setData(newD.current);
     
   }, []);
   useEffect(() => {
-    let l=JSON.parse(localStorage.getItem("gri6"));
+    let l=gri6;
     if(l!=null)
-    l=Object.entries(JSON.parse(localStorage.getItem("gri6")));
+    l=Object.entries(gri6);
     const enhancedData = GRI306.map(row => ({
       ...row,
       amount:l===null?"" : l[row.id][1],
@@ -117,7 +120,7 @@ setData(newD.current);
     if(comUpdate.current=="")return;
   
     if(prev[comUpdate.current]===curr.current[comUpdate.current] || curr.current[comUpdate.current]==null || curr.current[comUpdate.current]==""){
-      localStorage.setItem("gri6",JSON.stringify(curr.current));
+      setgri6(curr.current)
   window.dispatchEvent(new Event('storageUpdated'));
   if(prev[comUpdate.current]=='N/A' || curr.current[comUpdate.current]=="N/A")
   setData(newD.current);
@@ -126,7 +129,7 @@ setData(newD.current);
       if(prev[comUpdate.current]!='N/A' && curr.current[comUpdate.current]!="N/A"){
         const diff=Math.round((curr.current[comUpdate.current]-prev[comUpdate.current])*100/prev[comUpdate.current])
         if(Math.abs(diff)<10){
-          localStorage.setItem("gri6",JSON.stringify(curr.current));
+          setgri6(curr.current)
           window.dispatchEvent(new Event('storageUpdated'));
          
           return;
@@ -154,7 +157,7 @@ setData(newD.current);
    
     if(!isApplicable) newData[id-1].amount='N/A';
     else newData[id-1].amount=''
-    let temp=JSON.parse(localStorage.getItem("gri6"))
+    let temp=gri6
     newD.current=newData;
     switch(id){
       case 1: temp.hazwastefrdisposal=!isApplicable?'N/A':"";
@@ -184,7 +187,7 @@ setData(newD.current);
       const newEdits = edits.filter((edit) => !(edit.id === id && edit.field === field));
       newEdits.push({ id, field, value });
 
-      let temp = JSON.parse(localStorage.getItem('gri6'));
+      let temp = gri6;
       newD.current=newEdits;
       newEdits.forEach((edit) => {
         switch (edit.id) {

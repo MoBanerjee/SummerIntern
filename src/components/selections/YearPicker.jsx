@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
+const {ym,setym}=useState(YMContext)
+
 const YearPicker = ({ minYear = 2023, maxYear = 2035, onChange ,editable}) => {
   const current=new Date().getFullYear();
   const currentM=new Date().getMonth();
   let start=currentM==0?new Date().getFullYear()-1: new Date().getFullYear();
-  const [year, setYear] = useState(JSON.parse(localStorage.getItem('ym'))===null?start:JSON.parse(localStorage.getItem('ym')).slice(0, 4));
+  const [year, setYear] = useState(ym===null?start:ym.slice(0, 4));
 
   const handleChange = (event) => {
     setYear(event.target.value);

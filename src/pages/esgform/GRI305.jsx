@@ -3,7 +3,7 @@ import React,{useState,useEffect} from 'react';
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { GRI305 } from "../../data/Entities";
-import Header from "../../components/Header";
+import Header from "../../components/ui/Header";
 import { useTheme } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { Box ,Button,Switch} from '@mui/material';
@@ -14,6 +14,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import Gri5Context from '../../context/Gri5Context'
+import Grip5Context from '../../context/Grip5Context'
+
+const {gri5,setgri5}=useContext(Gri5Context);
+const {grip5,setgrip5}=useContext(Grip5Context);
 
 const Gri5 = ({editable}) => {
   const VisuallyHiddenInput = styled('input')({
@@ -35,7 +40,7 @@ const Gri5 = ({editable}) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const[holder,setHold] =useState([])
 
-  const [prev,setPrev]=useState(JSON.parse(localStorage.getItem("grip5")));
+  const [prev,setPrev]=grip5;
   const curr =React.useRef("");
   const [open, setOpen] = React.useState(false);
   const tempBool=React.useRef(false);
@@ -60,7 +65,7 @@ const Gri5 = ({editable}) => {
   };
   const handleCloseConfirm = () => {
 tempBool.current=false;
-localStorage.setItem("gri5",JSON.stringify(curr.current));
+setgri5(curr.current)
 window.dispatchEvent(new Event('storageUpdated'));
 setData(newD.current);
 
@@ -71,7 +76,8 @@ setData(newD.current);
     if(comUpdate.current=="")return;
   
     if(prev[comUpdate.current]===curr.current[comUpdate.current] || curr.current[comUpdate.current]==null || curr.current[comUpdate.current]==""){
-      localStorage.setItem("gri5",JSON.stringify(curr.current));
+      
+      setgri5(curr.current)
   window.dispatchEvent(new Event('storageUpdated'));
   if(prev[comUpdate.current]=='N/A' || curr.current[comUpdate.current]=="N/A")
   setData(newD.current);
@@ -80,7 +86,7 @@ setData(newD.current);
       if(prev[comUpdate.current]!='N/A' && curr.current[comUpdate.current]!="N/A"){
         const diff=Math.round((curr.current[comUpdate.current]-prev[comUpdate.current])*100/prev[comUpdate.current])
         if(Math.abs(diff)<10){
-          localStorage.setItem("gri5",JSON.stringify(curr.current));
+          setgri5(curr.current)
           window.dispatchEvent(new Event('storageUpdated'));
          
           return;
@@ -117,9 +123,9 @@ setData(newD.current);
     URL.revokeObjectURL(fileURL);
   };
   useEffect(() => {
-    let l=JSON.parse(localStorage.getItem("gri5"));
+    let l=gri5;
     if(l!=null)
-    l=Object.entries(JSON.parse(localStorage.getItem("gri5")));
+    l=Object.entries(gri5);
     const enhancedData = GRI305.map(row => ({
       ...row,
       amount:l===null?"" : l[row.id][1],
@@ -131,9 +137,9 @@ setData(newD.current);
     
   }, []);
   useEffect(() => {
-    let l=JSON.parse(localStorage.getItem("gri5"));
+    let l=gri5;
     if(l!=null)
-    l=Object.entries(JSON.parse(localStorage.getItem("gri5")));
+    l=Object.entries(gri5);
     const enhancedData = GRI305.map(row => ({
       ...row,
       amount:l===null?"" : l[row.id][1],
@@ -155,7 +161,7 @@ setData(newD.current);
    
     if(!isApplicable) newData[id-1].amount='N/A';
     else newData[id-1].amount=''
-    let temp=JSON.parse(localStorage.getItem("gri5"))
+    let temp=gri5
     newD.current=newData;
     switch(id){
       case 1: temp.co2=!isApplicable?'N/A':"";
@@ -208,7 +214,7 @@ setData(newD.current);
       const newEdits = edits.filter((edit) => !(edit.id === id && edit.field === field));
       newEdits.push({ id, field, value });
 
-      let temp = JSON.parse(localStorage.getItem('gri5'));
+      let temp = gri5;
       newD.current=newEdits;
       newEdits.forEach((edit) => {
         switch (edit.id) {

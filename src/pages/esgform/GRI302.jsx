@@ -1,15 +1,16 @@
-import React,{useState,useEffect} from 'react';
+import React,{useState,useContext,useEffect} from 'react';
 import DialogContent from '@mui/material/DialogContent';
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import DialogContentText from '@mui/material/DialogContentText';
 import { GRI302 } from "../../data/Entities";
-import Header from "../../components/Header";
+import Header from "../../components/ui/Header";
 import { toast } from 'react-toastify';
 import { useTheme } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { Box ,Button,Switch, TextField, IconButton, MenuItem, Select, FormControl, InputLabel} from '@mui/material';
-
+import Gri2Context from '../../context/Gri2Context'
+import Grip2Context from '../../context/Grip2Context'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AddIcon from '@mui/icons-material/Add';
@@ -20,6 +21,8 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
+
+
 const customContentStyle = {
   width: '200%',
   maxWidth: 'none',
@@ -61,12 +64,13 @@ function shiftLastToSecond(arr) {
 
 const Gri2 = ({editable}) => {
   const [open, setOpen] = React.useState(false);
-
-  const [fields, setFields] = useState(JSON.parse(localStorage.getItem('gri2')).biodiesel==null?[]:JSON.parse(localStorage.getItem('gri2')).biodiesel);
+  const {gri2,setgri2}=useContext(Gri2Context);
+  const {grip2,setgrip2}=useContext(Grip2Context);
+  const [fields, setFields] = useState(gri2.biodiesel==null?[]:gri2.biodiesel);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const[holder,setHold] =useState([])
 
-  const [prev,setPrev]=useState(JSON.parse(localStorage.getItem("grip3")));
+  const [prev,setPrev]=useState(grip2);
   const curr =React.useRef("");
   const [openA, setOpenA] = React.useState(false);
   const tempBool=React.useRef(false);
@@ -89,7 +93,7 @@ const Gri2 = ({editable}) => {
   };
   const handleCloseConfirm = () => {
 tempBool.current=false;
-localStorage.setItem("gri3",JSON.stringify(curr.current));
+setgri2(curr.current)
 window.dispatchEvent(new Event('storageUpdated'));
 setData(newD.current);
 
@@ -100,7 +104,7 @@ setData(newD.current);
     if(comUpdate.current=="")return;
   
     if(prev[comUpdate.current]===curr.current[comUpdate.current] || curr.current[comUpdate.current]==null || curr.current[comUpdate.current]==""){
-      localStorage.setItem("gri3",JSON.stringify(curr.current));
+      setgri2(curr.current)
   window.dispatchEvent(new Event('storageUpdated'));
   if(prev[comUpdate.current]=='N/A' || curr.current[comUpdate.current]=="N/A")
   setData(newD.current);
@@ -109,7 +113,7 @@ setData(newD.current);
       if(prev[comUpdate.current]!='N/A' && curr.current[comUpdate.current]!="N/A"){
         const diff=Math.round((curr.current[comUpdate.current]-prev[comUpdate.current])*100/prev[comUpdate.current])
         if(Math.abs(diff)<10){
-          localStorage.setItem("gri3",JSON.stringify(curr.current));
+          setgri2(curr.current)
           window.dispatchEvent(new Event('storageUpdated'));
          
           return;
@@ -203,9 +207,9 @@ setData(newD.current);
   const [edits, setEdits] = useState([]);
   const [data, setData] = useState([]);
   useEffect(() => {
-    let l=JSON.parse(localStorage.getItem("gri2"));
+    let l=gri2;
     if(l!=null){
-    l=Object.entries(JSON.parse(localStorage.getItem("gri2")));
+    l=Object.entries(gri2);
     l=shiftLastToSecond(l)}
 
     const enhancedData = GRI302.map(row => ({
@@ -228,9 +232,9 @@ setData(newD.current);
     },
   });
   useEffect(() => {
-    let l=JSON.parse(localStorage.getItem("gri2"));
+    let l=gri2;
     if(l!=null){
-    l=Object.entries(JSON.parse(localStorage.getItem("gri2")));
+    l=Object.entries(gri2);
   l=shiftLastToSecond(l)}
 
     const enhancedData = GRI302.map(row => ({
@@ -247,7 +251,7 @@ setData(newD.current);
     () => {
 
 
-      let temp = JSON.parse(localStorage.getItem('gri2'));
+      let temp = gri2;
       if(fields.length==0)temp.biodiesel=null
       else {
         let t=false;
@@ -259,7 +263,7 @@ setData(newD.current);
         }});
         if(t)return;}
         temp.biodiesel=fields;
-        localStorage.setItem('gri2', JSON.stringify(temp));
+        setgri2(temp)
       window.dispatchEvent(new Event('storageUpdated'));
       setOpen(false);
     }
@@ -276,9 +280,9 @@ setData(newD.current);
    
     if(!isApplicable) newData[id-1].amount='N/A';
     else newData[id-1].amount=''
-    let temp=JSON.parse(localStorage.getItem("gri2"))
+    let temp=gri2
     temp.biodiesel=!isApplicable?'N/A':"";
-    localStorage.setItem("gri2",JSON.stringify(temp))
+    setgri2(temp)
     window.dispatchEvent(new Event('storageUpdated'));
     setData(newData);
 
@@ -295,7 +299,7 @@ setData(newD.current);
    
     if(!isApplicable) newData[id-1].amount='N/A';
     else newData[id-1].amount=''
-    let temp=JSON.parse(localStorage.getItem("gri2"))
+    let temp=gri2
     switch(id){
       case 1: temp.diesel=!isApplicable?'N/A':"";
       break;
@@ -322,7 +326,7 @@ setData(newD.current);
       case 13: temp.recsrenewableenergy=!isApplicable?'N/A':"";
       break;
     }
- localStorage.setItem("gri2",JSON.stringify(temp))
+ setgri2(temp)
  window.dispatchEvent(new Event('storageUpdated'));
     setData(newData);
   };
@@ -332,7 +336,7 @@ setData(newD.current);
       const newEdits = edits.filter((edit) => !(edit.id === id && edit.field === field));
       newEdits.push({ id, field, value });
 
-      let temp = JSON.parse(localStorage.getItem('gri2'));
+      let temp = gri2;
       newEdits.forEach((edit) => {
         switch (edit.id) {
           case 1: temp.diesel=edit.value;
@@ -361,7 +365,7 @@ setData(newD.current);
           break;
         }
       });
-      localStorage.setItem('gri2', JSON.stringify(temp));
+      setgri2(temp)
       window.dispatchEvent(new Event('storageUpdated'));
       
     },
@@ -373,7 +377,7 @@ setData(newD.current);
     { field: "entity", headerName: "Entity", flex: 0.5 },
     { field: "amount", headerName: "Quantity", type: 'number', flex: 0.5, editable: (params) => !params.row.isApplicable,
     renderCell: (params) => {
-      if (params.row.id === 2 && JSON.parse(localStorage.getItem('gri2')).biodiesel!='N/A') {
+      if (params.row.id === 2 && gri2.biodiesel!='N/A') {
         return (
           <Button
             component="label"
@@ -388,7 +392,7 @@ setData(newD.current);
     {editable? "Add Grade/ Value":"View Grade/ Value"}
           </Button>
         );
-      } else if(params.row.id === 2 && JSON.parse(localStorage.getItem('gri2')).biodiesel==='N/A'){
+      } else if(params.row.id === 2 && gri2.biodiesel==='N/A'){
         return(<span>N/A</span>)
       }else {
         return (
@@ -495,9 +499,9 @@ setData(newD.current);
             onCellEditCommit={handleEditCommit}
             getRowClassName={(params) => {
               let res='';
-              if(params.row.id==2 && (JSON.parse(localStorage.getItem("gri2")).biodiesel==null || JSON.parse(localStorage.getItem("gri2")).biodiesel=='') )res='row--empty'
-              else if(params.row.id==2 && !(JSON.parse(localStorage.getItem("gri2")).biodiesel==null || JSON.parse(localStorage.getItem("gri2")).biodiesel=="N/A" || JSON.parse(localStorage.getItem("gri2")).biodiesel=='') )res='row--fillo'
-              else if(params.row.id==2 && (JSON.parse(localStorage.getItem("gri2")).biodiesel==='N/A') )res='row--na'
+              if(params.row.id==2 && (gri2.biodiesel==null || gri2.biodiesel=='') )res='row--empty'
+              else if(params.row.id==2 && !(gri2.biodiesel==null || gri2.biodiesel=="N/A" || gri2.biodiesel=='') )res='row--fillo'
+              else if(params.row.id==2 && (gri2.biodiesel==='N/A') )res='row--na'
               else if(params.row.amount === null || params.row.amount === '')res='row--empty';
               else if(params.row.amount === 'N/A')res='row--na';
               else res='row--fillo'

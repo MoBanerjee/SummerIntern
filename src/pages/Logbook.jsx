@@ -4,6 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import axios from 'axios';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import APIManager from '../APIManager/APIManager'
 
 const Logbook = () => {
   const [actorSearchTerm, setActorSearchTerm] = useState('');
@@ -19,7 +20,8 @@ const Logbook = () => {
   useEffect(() => {
     const getLogs = async () => {
       try {
-        const response = await axios.post('http://localhost:3000/getLogs');
+        const response = 
+        APIManager.getLogs({})
         const temp = response.data.rows.map(row => ({
           timestamp: row.time_of_action.slice(0, 10) + " " + row.time_of_action.slice(11, 23),
           event: row.action,

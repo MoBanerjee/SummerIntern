@@ -4,8 +4,9 @@ import { Formik } from "formik";
 import axios from 'axios';
 import * as yup from "yup";
 import { toast } from 'react-toastify';
-import Header from "../components/Header";
+import Header from "../components/ui/Header";
 import { green, red } from '@mui/material/colors';
+import APIManager from '../APIManager/APIManager'
 
 const DeleteProfile = () => {
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
@@ -13,9 +14,8 @@ const DeleteProfile = () => {
 
   const handleDeleteSubmit = async (setFieldValue) => {
     try {
-      const response = await axios.post(`http://localhost:3000/deleteProfile`, {
-        email: formValues.email,
-      });
+      const response = 
+      APIManager.deleteProfile({email: formValues.email,})
       setOpenConfirmDialog(false);
       setFormValues({ email: "" });
       setFieldValue("email", "");

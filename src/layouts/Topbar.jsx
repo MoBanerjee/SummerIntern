@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Box, IconButton, useTheme, Menu, MenuItem } from "@mui/material";
 import { useContext } from "react";
-import { ColorModeContext, tokens } from "../../theme";
-import { white } from '@mui/material/colors';
+import { ColorModeContext, tokens } from "../theme";
 import { styled } from '@mui/material/styles';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useNavigate } from 'react-router-dom';
@@ -14,14 +13,11 @@ import { toast } from "react-toastify";
 import DialogTitle from '@mui/material/DialogTitle';
 import { red, green } from '@mui/material/colors';
 import Button from '@mui/material/Button';
-import Inbox from '../../components/Inbox';; 
+import Inbox from '../components/notifications/Inbox';; 
 const Topbar = () => {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-  const colorMode = useContext(ColorModeContext);
   const [openD, setOpenD] = React.useState(false);
-  const userinfo = JSON.parse(localStorage.getItem("user"))|| [];
+  const userinfo = user|| [];
   const handleCloseD = () => {
     setOpenD(false);
   };
@@ -59,12 +55,12 @@ const Topbar = () => {
     },
   }));
   const handleSwitch = () => {
-    let temp=JSON.parse(localStorage.getItem("user"))
+    let temp=user
     if(temp[0].role=="Admin")
    temp[0].role="Approver 2"
   else temp[0].role="Admin"
 
-    localStorage.setItem('user', JSON.stringify(temp));
+    setuser(temp)
     
     toast.success("You are now logged in as "+temp[0].role);
         navigate("/home");

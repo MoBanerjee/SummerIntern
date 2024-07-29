@@ -1,9 +1,26 @@
 
-import React from 'react';
+import React,{useContext,useState} from 'react';
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
-import axios from 'axios';
+
+import fidContext from '../../context/FormIDContext'
+import ManhoursContext from '../../context/ManhoursContext'
+import UserContext from '../../context/UserContext'
+import RemarkContext from '../../context/RemarkContext'
+import StateContext from '../../context/StateContext'
+import YMContext from '../../context/YMContext'
+import CurrentBUContext from '../../context/CurrentBUContext'
+import Gri1Context from '../../context/Gri1Context'
+import Gri2Context from '../../context/Gri2Context'
+import Gri3Context from '../../context/Gri3Context'
+import Gri5Context from '../../context/Gri5Context'
+import Gri6Context from '../../context/Gri6Context'
+import Grip1Context from '../../context/Grip1Context'
+import Grip2Context from '../../context/Grip2Context'
+import Grip3Context from '../../context/Grip3Context'
+import Grip5Context from '../../context/Grip5Context'
+import Grip6Context from '../../context/Grip6Context'
 import { red, green ,orange} from '@mui/material/colors';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -15,8 +32,8 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CloseIcon from '@mui/icons-material/Close';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import { useNavigate } from 'react-router-dom';
-
 import GRI1 from './GRI301';
+import APIManager from '../../APIManager/APIManager'
 import GRI2 from './GRI302';
 import GRI3 from './GRI303';
 import GRI5 from './GRI305';
@@ -27,7 +44,8 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import UseModal from '../../components/RemarksBox';; 
+import UseModal from '../../components/remarks/RemarksBox';; 
+
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -63,6 +81,8 @@ const ColorButtonApprove = styled(Button)(({ theme }) => ({
   },
 }));
 
+
+
 const ColorButtonDeny = styled(Button)(({ theme }) => ({
   color: theme.palette.getContrastText(red[500]),
   backgroundColor: red[500],
@@ -87,25 +107,43 @@ const ColorButtonClose = styled(Button)(({ theme }) => ({
   },
 }));  
 
-function clearStorage(){
-  localStorage.setItem('fid', null);
-  localStorage.setItem('manhours', null);
 
-  localStorage.setItem('gri1', null);
-  localStorage.setItem('gri2', null);
-  localStorage.setItem('gri3', null);
-  localStorage.setItem('gri5', null);
-  localStorage.setItem('gri6', null);
-}
 
 function ApproveDenyForm({ editable }) {
+  const {fid, setfid}=useContext(fidContext);
+const {manhours,setmanhours}=useContext(ManhoursContext);
+const {remarks,setremarks}=useContext(RemarkContext);
+const {currentBu,setcurrentBu}=useContext(CurrentBUContext);
+const {state,setstate}=useState(StateContext)
+const {ym,setym}=useState(YMContext)
+const {user,setuser}=useContext(UserContext);
+const {gri1,setgri1}=useContext(Gri1Context);
+const {gri2,setgri2}=useContext(Gri2Context);
+const {gri3,setgri3}=useContext(Gri3Context);
+const {gri5,setgri5}=useContext(Gri5Context);
+const {gri6,setgri6}=useContext(Gri6Context);
+const {grip1,setgrip1}=useContext(Grip1Context);
+const {grip2,setgrip2}=useContext(Grip2Context);
+const {grip3,setgrip3}=useContext(Grip3Context);
+const {grip5,setgrip5}=useContext(Grip5Context);
+const {grip6,setgrip6}=useContext(Grip6Context);
+function clearStorage(){
+  setfid(null);
+  setmanhours(null);
+  setgri1(null);
+  setgri2(null);
+  setgri3(null);
+  setgri5(null);
+  setgri6(null);
+
+}
   const navigate = useNavigate();
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
   const [openA, setOpenA] = React.useState(false);
   const [openD, setOpenD] = React.useState(false);
   const [showModal, setShowModal] = React.useState(false); 
-  const userinfo = JSON.parse(localStorage.getItem("user"))|| [];
+  const userinfo = user|| [];
   const role = userinfo[0].role 
   const handleGoBack = async () => {
     clearStorage();
@@ -116,12 +154,12 @@ function ApproveDenyForm({ editable }) {
     try {
         let t="al1"
         if(role==="Approver 2")t="al2"
-      await axios.post(`http://localhost:3000/approveForm`, {
-        fid: JSON.parse(localStorage.getItem("fid")),
+      
+      APIManager.approveForm({
+        fid: fid,
         type: t,
         doer:userinfo[0].email
-      });
-
+      })
       toast.success("Form has been approved successfully!");
       setTimeout(() => {
         clearStorage();
@@ -137,15 +175,13 @@ function ApproveDenyForm({ editable }) {
     try {
         let t="dl1"
         if(role==="Approver 2")t="dl2"
-        const results = await axios.post(`http://localhost:3000/denyForm`, {
+        const results = APIManager.denyForm({
 
-fid:JSON.parse(localStorage.getItem("fid")),
-type:t,
-doer:userinfo[0].email
-
-        });
-
-
+  fid:fid,
+  type:t,
+  doer:userinfo[0].email
+  
+          })
         
         
       } catch (error) {

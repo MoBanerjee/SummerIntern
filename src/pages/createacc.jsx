@@ -4,21 +4,24 @@ import { Formik } from "formik";
 import axios from 'axios';
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import Header from "../components/Header";
-import MultiSelectDropdown from "../components/MultiSelectDropdownRoles";
-import CustomTextNumberDropdown from "../components/BUDropdown";
+import Header from "../components/ui/Header";
+import MultiSelectDropdown from "../components/selections/MultiSelectDropdownRoles";
+import CustomTextNumberDropdown from "../components/selections/BUDropdown";
 import { toast } from 'react-toastify';
+import APIManager from '../APIManager/APIManager'
+
 const CreateAccount = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const submitData = async (values,resetForm) => {
 
     try {
-      const response = await axios.post(`http://localhost:3000/createAccount`, {
+      const response = 
+      APIManager.createAccount({
         email:values.email,
         password:values.password,
         bus:values.bus,
         roles:values.roles
-      });
+      })
       toast.success("Account created successfully");
       resetForm(); 
       return;

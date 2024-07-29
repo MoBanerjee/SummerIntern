@@ -1,106 +1,26 @@
-/**import React, { useEffect } from "react";
-import { Box, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import { useMsal, useIsAuthenticated } from "@azure/msal-react";
-import axios from "axios";
-import AuthProvider from "./AuthProvider"
-import useMediaQuery from "@mui/material/useMediaQuery";
-import secureLocalStorage from "react-secure-storage";
-import Header from "../components/Header";
-import { toast } from "react-toastify";
 
-const CreateAccount = () => {
-  const navigate = useNavigate();
-  const isNonMobile = useMediaQuery("(min-width:600px)");
-  const { instance, accounts } = useMsal();
-  const isAuthenticated = useIsAuthenticated();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      const account = accounts[0];
-      instance.acquireTokenSilent({
-        scopes: ["User.Read"],
-        account,
-      }).then(response => {
-        const accessToken = response.accessToken;
-        getUserInfo(accessToken);
-      }).catch(error => {
-        console.error("Silent token acquisition failed: ", error);
-        instance.acquireTokenPopup({
-          scopes: ["User.Read"],
-        }).then(response => {
-          const accessToken = response.accessToken;
-          getUserInfo(accessToken);
-        });
-      });
-    }
-  }, [isAuthenticated, accounts, instance]);
-
-  const getUserInfo = async (accessToken) => {
-
-    try {
-      const response = await axios.get("https://graph.microsoft.com/v1.0/me", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          client_secret:"077fc6a0-6bb9-4925-8ba8-800362f4584f"
-        },
-      });
-      secureLocalStorage.setItem("user", JSON.stringify(response.data));
-      toast.success("Logged in successfully!");
-      navigate("/home");
-    } catch (error) {
-      console.error("Error fetching user info:", error);
-    }
-  };
-
-  const handleOAuthLogin = () => {
-    instance.loginPopup({
-      scopes: ["openid", "profile", "email", "offline_access", "User.Read"],
-    }).catch(error => {
-      console.error(error);
-      toast.error("Login failed. Please try again.");
-    });
-  };
-
-  return (
-    <Box m="20px">
-      <Header title="Login" subtitle="Log in using your Outlook account" />
-      <Box display="flex" justifyContent="center" mt="20px">
-        <Button onClick={handleOAuthLogin} color="primary" variant="contained">
-          Login with Outlook
-        </Button>
-      </Box>
-    </Box>
-  );
-};
-
-const Login = () => {
-  return (
-    <AuthProvider>
-      <CreateAccount />
-    </AuthProvider>
-  );
-};
-
-export default Login;*/
-import React, { useState } from 'react';
+import React, { useState ,useContext} from 'react';
 import { Box, Button, TextField, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import { Formik } from "formik";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import secureLocalStorage from "react-secure-storage";
-import Header from "../components/Header";
+import Header from "../components/ui/Header";
 import { toast } from 'react-toastify';
-import { red, green } from '@mui/material/colors';
+import { green } from '@mui/material/colors';
+import APIManager from '../APIManager/APIManager'
+import UserContext from '../context/UserContext'
+
+
 
 const CreateAccount = () => {
+  const {userContext,setuser}=useContext(UserContext);
   const navigate = useNavigate();
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const [user, setUser] = useState();
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
-  const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
+
   const [emailForReset, setEmailForReset] = useState("");
   const [openD, setOpenD] = useState(false);
 
@@ -113,9 +33,9 @@ const CreateAccount = () => {
   };
 
   const handleAdmin = () => {
-    let temp=JSON.parse(localStorage.getItem("user"))
+    let temp=userContext
    temp[0].role="Admin"
-    localStorage.setItem('user', JSON.stringify(temp));
+    setuser(temp)
     handleCloseD();
     toast.success("Logged in successfully!");
         navigate("/home");
@@ -124,9 +44,9 @@ const CreateAccount = () => {
   };
 
   const handleApprover2 = () => {
-    let temp=JSON.parse(localStorage.getItem("user"))
+    let temp=userContext
    temp[0].role="Approver 2"
-    localStorage.setItem('user', JSON.stringify(temp));
+   setuser(temp)
     handleCloseD();
     toast.success("Logged in successfully!");
         navigate("/home");
@@ -134,14 +54,16 @@ const CreateAccount = () => {
   };
   const submitData = async (values) => {
     try {
-      const response = await axios.post(`http://localhost:3000/verifyAccount`, {
+      const response = 
+      APIManager.verifyAccount({
         email: values.email,
         password: values.password,
-      });
+      })
+      localStorage.setItem("token",response.data.rows)
+      setUser(response.data.rows);
       
-      setUser(response.data);
       
-      localStorage.setItem('user', JSON.stringify(response.data));
+      setuser(response.data)
       if(response.data[0].highprivelege){
         
         handleOpenD();
@@ -164,11 +86,16 @@ const CreateAccount = () => {
 
   const handleForgotPasswordSubmit = async () => {
     try {
-      const response = await axios.post(`http://localhost:3000/checkEmail`, { email: emailForReset });
+      const response = 
+      APIManager.checkEmail({
+        email: emailForReset
+      })
       if (response.status === 200) {
         setForgotPasswordOpen(false);
-        const response = await axios.post(`http://localhost:3000/forgotPassword`, { email: emailForReset });
-        
+        const response =
+        APIManager.forgotPassword({
+          email: emailForReset
+        })
       } 
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -185,10 +112,11 @@ const CreateAccount = () => {
     const token = urlParams.get('token');
 
     try {
-      const response = await axios.post(`http://localhost:3000/resetPassword`, {
+      const response = 
+      APIManager.resetPassword({
         token,
         newPassword: values.newPassword,
-      });
+      })
       toast.success("Password reset successfully! Logging in...");
       navigate("/login");
     } catch (error) {

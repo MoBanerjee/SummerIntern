@@ -1,4 +1,4 @@
-import React,{useEffect} from 'react';
+import React,{useEffect,useContext} from 'react';
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
@@ -9,6 +9,7 @@ import Tab from '@mui/material/Tab';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import { toast } from 'react-toastify';
+import RemarkContext from '../context/RemarkContext'
 import Button from '@mui/material/Button';
 import SendIcon from '@mui/icons-material/Send';
 import CommentIcon from '@mui/icons-material/Comment';
@@ -27,6 +28,16 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import fidContext from '../context/FormIDContext'
+import ManhoursContext from '../context/ManhoursContext'
+import UserContext from '../context/UserContext'
+import Gri1Context from '../context/Gri1Context'
+import Gri2Context from '../context/Gri2Context'
+import Gri3Context from '../context/Gri3Context'
+import Gri5Context from '../context/Gri5Context'
+import Gri6Context from '../context/Gri6Context'
+import APIManager from '../APIManager/APIManager'
+
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -140,17 +151,17 @@ const LargeTooltip = styled(({ className, ...props }) => (
     fontSize: '1rem', 
   },
 });
-function clearStorage(){
-  localStorage.setItem('fid',null);
-  localStorage.setItem('manhours',null);
-  
-  localStorage.setItem('gri1',null);
-  localStorage.setItem('gri2',null);
-  localStorage.setItem('gri3',null);
-  localStorage.setItem('gri5',null);
-  localStorage.setItem('gri6',null);
-}
+
 function FloatingActionButtonZoom({editable}) {
+  const {fid, setfid}=useContext(fidContext);
+const {manhours,setmanhours}=useContext(ManhoursContext);
+const {user,setuser}=useContext(UserContext);
+const {gri1,setgri1}=useContext(Gri1Context);
+const {gri2,setgri2}=useContext(Gri2Context);
+const {gri3,setgri3}=useContext(Gri3Context);
+const {gri5,setgri5}=useContext(Gri5Context);
+const {gri6,setgri6}=useContext(Gri6Context);
+const {remarks,setremarks}=useContext(RemarkContext);
   const navigate = useNavigate();
     const theme = useTheme();
     const [value, setValue] = React.useState(0);
@@ -163,13 +174,22 @@ function FloatingActionButtonZoom({editable}) {
   const [bgdcolor4, setColor4] = React.useState("#ff7f7f");
   const [bgdcolor5, setColor5] = React.useState("#ff7f7f");
   const [bgdcolor6, setColor6] = React.useState("#ff7f7f");
+  function clearStorage(){
+    setfid(null);
+    setmanhours(null);
+    setgri1(null);
+    setgri2(null);
+    setgri3(null);
+    setgri5(null);
+    setgri6(null);
+  }
   const updateColors = () => {
-    let g1 = JSON.parse(localStorage.getItem("gri1"));
-    let g2 = JSON.parse(localStorage.getItem("gri2"));
-    let g3 = JSON.parse(localStorage.getItem("gri3"));
-    let g5 = JSON.parse(localStorage.getItem("gri5"));
-    let g6 = JSON.parse(localStorage.getItem("gri6"));
-    let mh = JSON.parse(localStorage.getItem("manhours"));
+    let g1 = gri1
+    let g2 = gri2
+    let g3 = gri3
+    let g5 = gri5
+    let g6 = gri6
+    let mh = manhours
 
     if (mh === null || mh === "") setColor1("#ff7f7f");
     else setColor1("lightgreen");
@@ -212,7 +232,7 @@ function FloatingActionButtonZoom({editable}) {
     };
   }, []);
   useEffect(() => {
-    const state = JSON.parse(localStorage.getItem('state'));
+    const state = state
     setLocalState(state);
   }, []);
     const handleChange = (event, newValue) => {
@@ -232,12 +252,12 @@ function FloatingActionButtonZoom({editable}) {
     const submitForm=async()=> {
       setOpen(false);
       
-      let g1=JSON.parse(localStorage.getItem("gri1"))
-      let g2=JSON.parse(localStorage.getItem("gri2"))
-      let g3=JSON.parse(localStorage.getItem("gri3"))
-      let g5=JSON.parse(localStorage.getItem("gri5"))
-      let g6=JSON.parse(localStorage.getItem("gri6"))
-      let mh=JSON.parse(localStorage.getItem("manhours"))
+      let g1=gri1
+      let g2=gri2
+      let g3=gri3
+      let g5=gri5
+      let g6=gri6
+      let mh=manhours
       let isEmpty=mh===null || mh===""
       
       let listobj=[g1,g2,g3,g5,g6];
@@ -255,24 +275,24 @@ function FloatingActionButtonZoom({editable}) {
         if(mh=='N/A')mh=-1;
         try {
       
-          const results = await axios.post(`http://localhost:3000/submitForm`, {
-            gri1:g1,
-            gri2:g2,
-            gri3:g3,
-            gri5:g5,
-            gri6:g6,
+          const results = 
+APIManager.submitForm({
+  gri1:g1,
+  gri2:g2,
+  gri3:g3,
+  gri5:g5,
+  gri6:g6,
 mh:mh,
-fid:JSON.parse(localStorage.getItem("fid")),
+fid:fid,
 type:"submittedre",
-doer:JSON.parse(localStorage.getItem("user"))[0].email
-          });
-          const resolve = await axios.post(`http://localhost:3000/resolveRemark`, {
-
-
-fid:JSON.parse(localStorage.getItem("fid")),
-doer:JSON.parse(localStorage.getItem("user"))[0].email
-
-          });
+doer:user[0].email
+})
+          const resolve = 
+          APIManager.resolveRemark({
+            fid:fid,
+            doer:user[0].email
+            
+          })
           toast.success("Your form has been resubmitted successfully!");
           setTimeout(() => {            clearStorage();
             navigate("/resubmitportal"); }, 0);
@@ -292,12 +312,12 @@ doer:JSON.parse(localStorage.getItem("user"))[0].email
     const saveDraft =async () => {
       setOpen(false);
       
-      let g1=JSON.parse(localStorage.getItem("gri1"))
-      let g2=JSON.parse(localStorage.getItem("gri2"))
-      let g3=JSON.parse(localStorage.getItem("gri3"))
-      let g5=JSON.parse(localStorage.getItem("gri5"))
-      let g6=JSON.parse(localStorage.getItem("gri6"))
-      let mh=JSON.parse(localStorage.getItem("manhours"))
+      let g1=gri1
+      let g2=gri2
+      let g3=gri3
+      let g5=gri5
+      let g6=gri6
+      let mh=manhours
 
    
         replaceNAWithMinusOne(g1);
@@ -309,17 +329,17 @@ doer:JSON.parse(localStorage.getItem("user"))[0].email
       
         try {
       
-          const results = await axios.post(`http://localhost:3000/submitFormRe`, {
-            gri1:g1,
-            gri2:g2,
-            gri3:g3,
-            gri5:g5,
-            gri6:g6,
+          const results = 
+APIManager.submitFormRe({
+  gri1:g1,
+  gri2:g2,
+  gri3:g3,
+  gri5:g5,
+  gri6:g6,
 mh:mh,
-fid:JSON.parse(localStorage.getItem("fid")),
-doer:JSON.parse(localStorage.getItem("user"))[0].email
-          });
-
+fid:fid,
+doer:user[0].email
+})
           toast.success("Your draft has been saved successfully!");
 
           setTimeout(() => {            clearStorage();
@@ -353,7 +373,7 @@ doer:JSON.parse(localStorage.getItem("user"))[0].email
 >{"Form has been " + localState}</Banner>
           {(localState === 'Denied by Level 1' || localState === 'Denied by Level 2') && (
             <LargeTooltip
-              title={JSON.parse(localStorage.getItem("remark"))}
+              title={remarks}
               open={tooltipOpen}
               onClose={() => setTooltipOpen(false)}
               disableFocusListener

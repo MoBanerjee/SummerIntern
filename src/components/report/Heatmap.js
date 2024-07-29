@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import "./heatmap.css";
 import axios from 'axios';
 import { FormControl, InputLabel, MenuItem, Select, Box } from '@mui/material';
-
+import APIManager from '../../APIManager/APIManager'
 const colors = {
   "Received by Level 2": "#2E8B57",
   "Denied": "#D32F2F",
@@ -49,10 +49,8 @@ const buDictionary = buData.reduce((dict, item) => {
 
 const getFormStatuses = async (year) => {
   try {
-    const response = await axios.post(`http://localhost:3000/getFormStatus`, {
-      year: year,
-      
-    });
+    const response = 
+    APIManager.getFormStatus({year: year,})
     const statusArray = response.data;
     return statusArray;
   } catch (error) {

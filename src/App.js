@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import Topbar from "./pages/global/Topbar";
+import Topbar from "./layouts/Topbar";
 import { useLocation } from "react-router-dom";
-import Sidebar from "./pages/global/Sidebar";
+import Sidebar from "./layouts/Sidebar";
 import { CssBaseline, ThemeProvider ,Box} from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
 import CreateAccount from "./pages/createacc";
 import Home from "./pages/home";
-//import VerifyAccount from "./pages/login";
 import Login from "./pages/loginOutlook";
 import Gri1 from "./pages/esgform/GRI301";
 import Gri2 from "./pages/esgform/GRI302";
@@ -30,6 +29,7 @@ import ViewFormsTemplate from "./pages/esgform/viewFormsTemplate";
 import Gri6 from "./pages/esgform/GRI306";
 import ServiceReq from "./pages/ServiceRequest";
 import ReviewReq from "./pages/RequestReview";
+
 function App() {
   const location = useLocation();
   const [theme, colorMode] = useMode();

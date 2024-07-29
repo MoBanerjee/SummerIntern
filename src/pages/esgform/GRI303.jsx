@@ -1,10 +1,10 @@
-import React,{useState,useEffect} from 'react';
+import React,{useState,useEffect,useContext} from 'react';
 import { Box, Button,Switch } from '@mui/material';
 import { DataGrid } from "@mui/x-data-grid";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { tokens } from "../../theme";
 import { GRI303 } from "../../data/Entities";
-import Header from "../../components/Header";
+import Header from "../../components/ui/Header";
 import { useTheme, styled } from "@mui/material/styles";
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import Dialog from '@mui/material/Dialog';
@@ -12,8 +12,14 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Gri3Context from '../../context/Gri3Context'
+import Grip3Context from '../../context/Grip3Context'
+
+
 
 const Gri3 = ({editable}) => {
+  const {gri3,setgri3}=useContext(Gri3Context);
+const {grip3,setgrip3}=useContext(Grip3Context);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [edits, setEdits] = useState([]);
@@ -21,7 +27,7 @@ const Gri3 = ({editable}) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const[holder,setHold] =useState([])
 
-  const [prev,setPrev]=useState(JSON.parse(localStorage.getItem("grip3")));
+  const [prev,setPrev]=useState(grip3);
   const curr =React.useRef("");
   const [open, setOpen] = React.useState(false);
   const tempBool=React.useRef(false);
@@ -46,7 +52,7 @@ const Gri3 = ({editable}) => {
   };
   const handleCloseConfirm = () => {
 tempBool.current=false;
-localStorage.setItem("gri3",JSON.stringify(curr.current));
+setgri3(curr.current)
 window.dispatchEvent(new Event('storageUpdated'));
 setData(newD.current);
 
@@ -58,7 +64,8 @@ setData(newD.current);
     if(comUpdate.current=="")return;
   
     if(prev[comUpdate.current]===curr.current[comUpdate.current] || curr.current[comUpdate.current]==null || curr.current[comUpdate.current]==""){
-      localStorage.setItem("gri3",JSON.stringify(curr.current));
+      
+      setgri3(curr.current)
   window.dispatchEvent(new Event('storageUpdated'));
   if(prev[comUpdate.current]=='N/A' || curr.current[comUpdate.current]=="N/A")
   setData(newD.current);
@@ -67,7 +74,8 @@ setData(newD.current);
       if(prev[comUpdate.current]!='N/A' && curr.current[comUpdate.current]!="N/A"){
         const diff=Math.round((curr.current[comUpdate.current]-prev[comUpdate.current])*100/prev[comUpdate.current])
         if(Math.abs(diff)<10){
-          localStorage.setItem("gri3",JSON.stringify(curr.current));
+          
+          setgri3(curr.current)
           window.dispatchEvent(new Event('storageUpdated'));
          
           return;
@@ -104,9 +112,9 @@ setData(newD.current);
     URL.revokeObjectURL(fileURL);
   };
   useEffect(() => {
-    let l=JSON.parse(localStorage.getItem("gri3"));
+    let l=gri3;
     if(l!=null)
-    l=Object.entries(JSON.parse(localStorage.getItem("gri3")));
+    l=Object.entries(gri3);
     const enhancedData = GRI303.map(row => ({
       ...row,
       amount: l===null?row.amount:l[row.id][1],
@@ -116,9 +124,9 @@ setData(newD.current);
   }, []);
 
   useEffect(() => {
-    let l=JSON.parse(localStorage.getItem("gri3"));
+    let l=gri3;
     if(l!=null)
-    l=Object.entries(JSON.parse(localStorage.getItem("gri3")));
+    l=Object.entries(gri3);
     const enhancedData = GRI303.map(row => ({
       ...row,
       amount: l===null?row.amount:l[row.id][1],
@@ -136,7 +144,7 @@ setData(newD.current);
    
     if(!isApplicable) newData[id-1].amount='N/A';
     else newData[id-1].amount=''
-    let temp=JSON.parse(localStorage.getItem("gri3"))
+    let temp=gri3;
     newD.current=newData;
     switch(id){
       case 1: temp.surfacewater=!isApplicable?'N/A':"";
@@ -165,7 +173,7 @@ setData(newD.current);
       const newEdits = edits.filter((edit) => !(edit.id === id && edit.field === field));
       newEdits.push({ id, field, value });
 
-      let temp = JSON.parse(localStorage.getItem('gri3'));
+      let temp = gri3;
       newD.current=newEdits;
       newEdits.forEach((edit) => {
         switch (edit.id) {

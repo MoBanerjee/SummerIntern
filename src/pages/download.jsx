@@ -7,6 +7,7 @@ import { Button, Box, AppBar, Toolbar, IconButton, Typography } from '@mui/mater
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
+import APIManager from '../APIManager/APIManager'
 
 const PdfDownloadComponent = () => {
   const navigate = useNavigate();
@@ -46,7 +47,8 @@ const PdfDownloadComponent = () => {
     });
 
     try {
-      await axios.post(`http://localhost:3000/makeLogEntry`);
+      
+      APIManager.makeLogEntry({})
     } catch (error) {
       console.error("Error :", error);
     }

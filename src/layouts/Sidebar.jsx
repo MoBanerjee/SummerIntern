@@ -1,23 +1,28 @@
-import React,{ useState } from 'react';
+import React,{ useState ,useContext} from 'react';
 import { ProSidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import BookmarkIcon from '@mui/icons-material/Bookmark';
-import { tokens } from "../../theme";
+import { tokens } from "../theme";
 import SubmitData from "@mui/icons-material/Backup";
-import  secureLocalStorage  from  "react-secure-storage";
 import EventRepeatIcon from '@mui/icons-material/EventRepeat';
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import HomeIcon from '@mui/icons-material/Home';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import SummarizeIcon from '@mui/icons-material/Summarize';
-import InsertChartIcon from '@mui/icons-material/InsertChart';
-import SeatriumLogo from "../../Assets/SeatriumLogo.png"
+import UserContext from '../context/UserContext'
+import CurrentBUContext from '../context/CurrentBUContext'
+import SeatriumLogo from "../assets/SeatriumLogo.png"
 import FlagIcon from '@mui/icons-material/Flag';
 import BookIcon from '@mui/icons-material/Book';
 import FeedbackIcon from '@mui/icons-material/Feedback';
+
+
 const Item = ({ title, to,state, icon, selected, setSelected,BU }) => {
+  const {currentBu,setcurrentBu}=useContext(CurrentBUContext);
+
+
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const handleClick = (BU) => {
@@ -25,7 +30,8 @@ const Item = ({ title, to,state, icon, selected, setSelected,BU }) => {
     setSelected(title);
 
  
-    localStorage.setItem('currentBu', JSON.stringify(state));
+    
+    setcurrentBu(state)
     
     
   };
@@ -47,6 +53,7 @@ const Item = ({ title, to,state, icon, selected, setSelected,BU }) => {
 };
 
 const Sidebar = () => {
+  const {user,setuser}=useContext(UserContext);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -56,7 +63,7 @@ const Sidebar = () => {
   const [isGOpen, setGOpen] = useState(false);
   const [isMOpen, setMOpen] = useState(false);
   const [isAOpen, setAOpen] = useState(false);
-  const userinfo = JSON.parse(localStorage.getItem("user"))|| [];
+  const userinfo = user|| [];
   const role = userinfo[0].role 
   const allbus=["B1","B2","B3","B4","B5","B6","B7","B8","B9","B10","B11","B12","B13","B14","B15","B16"];
   const bus =(role=="Approver 2" || role=="Admin") ?allbus:((userinfo.length > 0 && userinfo[0].bus) ? userinfo[0].bus : []);

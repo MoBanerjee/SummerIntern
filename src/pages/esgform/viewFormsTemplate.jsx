@@ -13,12 +13,38 @@ import CommentIcon from '@mui/icons-material/Comment';
 import Tooltip from '@mui/material/Tooltip';
 import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
+import fidContext from '../../context/FormIDContext'
+import ManhoursContext from '../../context/ManhoursContext'
+import UserContext from '../../context/UserContext'
+
+import StateContext from '../../context/StateContext'
+import YMContext from '../../context/YMContext'
+
+import Gri1Context from '../../context/Gri1Context'
+import Gri2Context from '../../context/Gri2Context'
+import Gri3Context from '../../context/Gri3Context'
+import Gri5Context from '../../context/Gri5Context'
+import Gri6Context from '../../context/Gri6Context'
+
 import GRI1 from './GRI301';
 import GRI2 from './GRI302';
 import GRI3 from './GRI303';
 import GRI5 from './GRI305';
 import GRI6 from './GRI306';
 import Manhours from './Manhours';
+
+
+const {fid, setfid}=useContext(fidContext);
+const {manhours,setmanhours}=useContext(ManhoursContext);
+
+const {state,setstate}=useState(StateContext)
+const {ym,setym}=useState(YMContext)
+const {user,setuser}=useContext(UserContext);
+const {gri1,setgri1}=useContext(Gri1Context);
+const {gri2,setgri2}=useContext(Gri2Context);
+const {gri3,setgri3}=useContext(Gri3Context);
+const {gri5,setgri5}=useContext(Gri5Context);
+const {gri6,setgri6}=useContext(Gri6Context);
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -103,16 +129,16 @@ const LargeTooltip = styled(({ className, ...props }) => (
   },
 });
 function clearStorage() {
-  localStorage.setItem('fid', null);
-  localStorage.setItem('manhours', null);
- 
-  localStorage.setItem('gri1', null);
-  localStorage.setItem('gri2', null);
-  localStorage.setItem('gri3', null);
-  localStorage.setItem('gri5', null);
-  localStorage.setItem('gri6', null);
-  localStorage.setItem('remark', null);
-  localStorage.setItem('state', null);
+  setfid(null);
+  setmanhours(null);
+  setgri1(null);
+  setgri2(null);
+  setgri3(null);
+  setgri5(null);
+  setgri6(null);
+  setremark(null);
+  setstate(null)
+
 }
 
 function FloatingActionButtonZoom({ editable }) {
@@ -123,7 +149,7 @@ function FloatingActionButtonZoom({ editable }) {
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   useEffect(() => {
-    const state = JSON.parse(localStorage.getItem('state'));
+    const state = state
     setLocalState(state);
   }, []);
 
@@ -160,7 +186,7 @@ function FloatingActionButtonZoom({ editable }) {
 >{"Form has been " + localState}</Banner>
           {(localState === 'Denied by Level 1' || localState === 'Denied by Level 2') && (
             <LargeTooltip
-              title={JSON.parse(localStorage.getItem("remark"))}
+              title={remark}
               open={tooltipOpen}
               onClose={() => setTooltipOpen(false)}
               disableFocusListener

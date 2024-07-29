@@ -3,9 +3,11 @@ import { Box,Switch } from '@mui/material';
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { ManHrs } from "../../data/Entities";
-import Header from "../../components/Header";
+import Header from "../../components/ui/Header";
 import { useTheme } from "@mui/material";
+import ManhoursContext from '../../context/ManhoursContext'
 
+const {manhours,setmanhours}=useContext(ManhoursContext);
 
 const Manhours = ({editable}) => {
   
@@ -14,7 +16,7 @@ const Manhours = ({editable}) => {
   const [edits, setEdits] = useState([]);
   const [data, setData] = useState([]);
   useEffect(() => {
-    const l=JSON.parse(localStorage.getItem("manhours"));
+    const l=manhours
     const enhancedData = ManHrs.map(row => ({
       ...row,
       number: l,
@@ -37,7 +39,7 @@ const Manhours = ({editable}) => {
     if(!isApplicable) newData[id-1].number='N/A';
     else newData[id-1].number=''
     let temp=!isApplicable?'N/A':"";
- localStorage.setItem("manhours",JSON.stringify(temp))
+ setmanhours(temp)
  window.dispatchEvent(new Event('storageUpdated'));
     setData(newData);
   };
@@ -50,7 +52,8 @@ const Manhours = ({editable}) => {
       newEdits.push({ id, field, value });
       newEdits.forEach((edit) => {
         switch (edit.id) {
-          case 1: localStorage.setItem("manhours",JSON.stringify(edit.value))
+          case 1: 
+          setmanhours(edit.value)
           window.dispatchEvent(new Event('storageUpdated'));
           break;
 

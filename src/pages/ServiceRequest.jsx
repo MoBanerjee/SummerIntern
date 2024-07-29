@@ -4,25 +4,29 @@ import { Formik } from "formik";
 import axios from 'axios';
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import Header from "../components/Header";
-import CustomTextNumberDropdown from "../components/BUDropdown";
+import Header from "../components/ui/Header";
+import CustomTextNumberDropdown from "../components/selections/BUDropdown";
 import { toast } from 'react-toastify';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import APIManager from '../APIManager/APIManager'
+
+const {user,setuser}=useContext(UserContext);
 
 const ServiceReq = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
-  const userinfo = JSON.parse(localStorage.getItem("user"))|| [];
+  const userinfo = user|| [];
   const submitData = async (values, resetForm) => {
     try {
         console.log(values.month)
-      const response = await axios.post(`http://localhost:3000/raiseTicket`, {
+      const response = 
+      APIManager.raiseTicket({
         reason: values.reason,
         month: values.month+1, 
         bus: values.bus,
         year: values.year,
         doer: userinfo[0].email
-      });
+      })
       toast.success("Ticket raised successfully");
       resetForm();
       return;

@@ -6,10 +6,11 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';  // Import Button component
+import Button from '@mui/material/Button';  
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import APIManager from '../APIManager/APIManager'
 
 function createData(RequestID, BU, Year, Month, Reason) {
   return { RequestID, BU, Year, Month, Reason };
@@ -62,7 +63,8 @@ export default function BasicTable() {
 
   React.useEffect(() => {
     async function fetchData() {
-      let results = await axios.post(`http://localhost:3000/reviewReq`);
+      let results = 
+      APIManager.reviewReq({})
       let temp = results.data.rows;
       let rowTemp = [];
       temp.forEach(element => {
@@ -75,20 +77,20 @@ export default function BasicTable() {
   }, []);
 
   const handleAccept = async (id,y,m,b) => {
-    const res= await axios.post(`http://localhost:3000/acceptReq`, {
+    const res= 
+    APIManager.acceptReq({
       rqid: id,
       ym:String(y)+String(reverseMonths[m]),
       bu:reverseBuDictionary[b]
-    });
+    })
    
     setRows((prevRows) => prevRows.filter((row) => row.RequestID !== id));
     toast.success("Request accepted successfully");
   };
 
   const handleDeny = async (id) => {
-    try{const res= await axios.post(`http://localhost:3000/denyReq`, {
-      rqid: id
-    });
+    try{const res= 
+    APIManager.denyReq({rqid: id})
     setRows((prevRows) => prevRows.filter((row) => row.RequestID !== id));
     toast.success("Request denied successfully");}catch(error){
       console.log(error)

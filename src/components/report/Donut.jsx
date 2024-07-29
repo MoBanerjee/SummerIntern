@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import CanvasJSReact from '@canvasjs/react-charts';
 import { FormControl, InputLabel, MenuItem, Select, Box } from '@mui/material';
 import axios from 'axios';
+import APIManager from '../../APIManager/APIManager'
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 const colors = {
 	"Received by Level 2": "#2E8B57",
@@ -37,10 +38,9 @@ const colors = {
   }, {});
   const getFormStats = async (year,bu) => {
 	try {
-	  const response = await axios.post(`http://localhost:3000/getFormStats`, {
-		year: year,
-		bu:bu
-	  });
+	  const response = 
+    APIManager.getFormStats({	year: year,
+      bu:bu})
 	  const statsArray = response.data;
 	  return statsArray;
 	} catch (error) {

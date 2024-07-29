@@ -6,9 +6,14 @@ import { GRI301 } from "../../data/Entities";
 import { styled } from '@mui/material/styles';
 import { Box ,Button,Switch, Tooltip,tooltipClasses  } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import Header from "../../components/Header";
+import Header from "../../components/ui/Header";
 import { useTheme } from "@mui/material";
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import Gri1Context from '../../context/Gri1Context'
+import Grip1Context from '../../context/Grip1Context'
+
+const {gri1,setgri1}=useContext(Gri1Context);
+const {grip1,setgrip1}=useContext(Grip1Context);
 function Gri1 ({editable}){
   const [tooltipText, setTooltipText] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -32,7 +37,7 @@ function Gri1 ({editable}){
     URL.revokeObjectURL(fileURL);
   };
   useEffect(() => {
-    const storedText = localStorage.getItem('remark');
+    const storedText = remark;
     if (storedText) {
       setTooltipText(storedText);
     }
@@ -67,12 +72,12 @@ function Gri1 ({editable}){
   const [data, setData] = useState([]);
   const[holder,setHold] =useState([])
 
-  const [prev,setPrev]=useState(JSON.parse(localStorage.getItem("grip1")));
+  const [prev,setPrev]=grip1;
   const curr =React.useRef("");
   useEffect(() => {
-    let l=JSON.parse(localStorage.getItem("gri1"));
+    let l=gri1;
     if(l!=null)
-    l=Object.entries(JSON.parse(localStorage.getItem("gri1")));
+    l=Object.entries(gri1);
     const enhancedData = GRI301.map(row => ({
       ...row,
 
@@ -85,9 +90,9 @@ function Gri1 ({editable}){
     
   }, []);
   useEffect(() => {
-    let l=JSON.parse(localStorage.getItem("gri1"));
+    let l=gri1;
     if(l!=null)
-    l=Object.entries(JSON.parse(localStorage.getItem("gri1")));
+    l=Object.entries(gri1);
     const enhancedData = GRI301.map(row => ({
       ...row,
 
@@ -116,7 +121,7 @@ function Gri1 ({editable}){
     if(!isApplicable) newData[id-1].amount='N/A';
     else newData[id-1].amount=''
     
-    let temp=JSON.parse(localStorage.getItem("gri1"))
+    let temp=gri1
   
 
   
@@ -193,7 +198,8 @@ function Gri1 ({editable}){
     }
 
 
-    localStorage.setItem("gri1",JSON.stringify(temp));
+    
+    setgri1(temp)
     window.dispatchEvent(new Event('storageUpdated'));
     setData(newData);
   
@@ -209,7 +215,7 @@ function Gri1 ({editable}){
       const newEdits = edits.filter((edit) => !(edit.id === id && edit.field === field));
       newEdits.push({ id, field, value });
 
-      let temp = JSON.parse(localStorage.getItem('gri1'));
+      let temp = gri1;
 
       newEdits.forEach((edit) => {
         switch (edit.id) {
@@ -253,7 +259,8 @@ function Gri1 ({editable}){
             break;
         }
       });
-      localStorage.setItem("gri1",JSON.stringify(curr.current));
+      
+      setgri1(curr.current)
       window.dispatchEvent(new Event('storageUpdated'));
    
 

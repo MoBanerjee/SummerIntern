@@ -6,19 +6,31 @@ import { useNavigate } from 'react-router-dom';
 import FormLabel from '@mui/joy/FormLabel';
 import Textarea from '@mui/joy/Textarea';
 import Typography from '@mui/joy/Typography';
-import axios from 'axios';
+
 import { toast } from 'react-toastify';
+import APIManager from '../../APIManager/APIManager'
+const {fid, setfid}=useContext(fidContext);
+const {manhours,setmanhours}=useContext(ManhoursContext);
+
+const {ym,setym}=useState(YMContext)
+
+const {gri1,setgri1}=useContext(Gri1Context);
+const {gri2,setgri2}=useContext(Gri2Context);
+const {gri3,setgri3}=useContext(Gri3Context);
+const {gri5,setgri5}=useContext(Gri5Context);
+const {gri6,setgri6}=useContext(Gri6Context);
+
 export default function EmptyTextarea() {
     const navigate = useNavigate();
   function clearStorage(){
-    localStorage.setItem('fid',null);
-    localStorage.setItem('manhours',null);
-    localStorage.setItem('ym',null);
-    localStorage.setItem('gri1',null);
-    localStorage.setItem('gri2',null);
-    localStorage.setItem('gri3',null);
-    localStorage.setItem('gri5',null);
-    localStorage.setItem('gri6',null);
+    setfid(null);
+    setmanhours(null);
+    setym(null)
+    setgri1(null);
+    setgri2(null);
+    setgri3(null);
+    setgri5(null);
+    setgri6(null);
   }
   const handleSubmit =async (value) => {
     try {
@@ -26,13 +38,12 @@ export default function EmptyTextarea() {
         toast.error("Please enter a remark!");
         return;
     }
-        const results = await axios.post(`http://localhost:3000/submitRemark`, {
+        const results = 
+APIManager.submitRemark({
+  fid:fid,
 
-fid:JSON.parse(localStorage.getItem("fid")),
-
-remarks:text
-        });
-
+  remarks:text
+})
         toast.success("Form has been denied successfully!");
         setTimeout(() => {            clearStorage();
           navigate("/grading"); }, 0);

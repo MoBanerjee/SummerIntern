@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState ,useContext} from 'react';
 import { Container, Typography, Card, CardContent, Grid, Avatar, Box, Chip } from '@mui/material';
 import { blue } from '@mui/material/colors';
+
+import UserContext from '../context/UserContext'
 
 const ViewProfile = () => {
     const [email, setEmail] = useState('');
     const [businessUnits, setBusinessUnits] = useState([]);
     const [accessLevel, setAccessLevel] = useState('');
+
+const {user,setuser}=useContext(UserContext);
     const buslist={};
     buslist["B1"]="SNE";
     buslist["B2"]="SOGA";
@@ -24,7 +28,7 @@ const ViewProfile = () => {
     buslist["B15"]="PTK";
     buslist["B16"]="EJA";
     useEffect(() => {
-        const userData = JSON.parse(localStorage.getItem("user"))[0];
+        const userData = user[0];
         setEmail(userData.email);
         setBusinessUnits(userData.bus);
         if(userData.highprivelege)

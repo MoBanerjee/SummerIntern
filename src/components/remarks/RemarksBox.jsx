@@ -14,6 +14,18 @@ import theme from './theme';
 import Fade from '@mui/material/Fade';
 import EmptyTextarea from './TextBox';
 import { useNavigate } from 'react-router-dom';
+import APIManager from '../../APIManager/APIManager'
+const {fid, setfid}=useContext(fidContext);
+const {manhours,setmanhours}=useContext(ManhoursContext);
+
+const {ym,setym}=useState(YMContext)
+const {user,setuser}=useContext(UserContext);
+const {gri1,setgri1}=useContext(Gri1Context);
+const {gri2,setgri2}=useContext(Gri2Context);
+const {gri3,setgri3}=useContext(Gri3Context);
+const {gri5,setgri5}=useContext(Gri5Context);
+const {gri6,setgri6}=useContext(Gri6Context);
+
 export default function UseModal() {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(true);
@@ -25,27 +37,26 @@ export default function UseModal() {
     setRemark(value);
   };
   function clearStorage(){
-    localStorage.setItem('fid',null);
-    localStorage.setItem('manhours',null);
-    localStorage.setItem('ym',null);
-    localStorage.setItem('gri1',null);
-    localStorage.setItem('gri2',null);
-    localStorage.setItem('gri3',null);
-    localStorage.setItem('gri5',null);
-    localStorage.setItem('gri6',null);
+    setfid(null);
+    setmanhours(null);
+    setym(null)
+    setgri1(null);
+    setgri2(null);
+    setgri3(null);
+    setgri5(null);
+    setgri6(null);
   }
   const handleSubmit =async (value) => {
     try {
     
-        const results = await axios.post(`http://localhost:3000/submitRemark`, {
-
-fid:JSON.parse(localStorage.getItem("fid")),
-doer:JSON.parse(localStorage.getItem("user"))[0].email,
-remarks:remark
-        });
-
+        const results = 
+APIManager.submitRemark({
+  fid:fid,
+  doer:user[0].email,
+  remarks:remark
+})
         toast.success("Form has been denied successfully!");
-        setTimeout(() => {            clearStorage();
+        setTimeout(() => {  clearStorage();
           navigate("/grading"); }, 0);
         
         
